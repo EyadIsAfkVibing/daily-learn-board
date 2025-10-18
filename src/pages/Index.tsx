@@ -126,6 +126,17 @@ const Index = () => {
 
   const uniqueSubjects = Object.keys(subjectProgress).sort();
 
+  // Helper functions
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr + "T00:00:00");
+    return date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  };
+
+  const isToday = (dateStr: string) => {
+    const today = new Date().toISOString().split("T")[0];
+    return dateStr === today;
+  };
+
   // Filter and search logic
   const filteredDays = useMemo(() => {
     return SCHEDULE.map((day, dayIdx) => {
@@ -208,16 +219,6 @@ const Index = () => {
     } else {
       toast.error("Today is not in the study schedule range");
     }
-  };
-
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr + "T00:00:00");
-    return date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
-  };
-
-  const isToday = (dateStr: string) => {
-    const today = new Date().toISOString().split("T")[0];
-    return dateStr === today;
   };
 
   return (
