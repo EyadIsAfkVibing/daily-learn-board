@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -222,120 +223,157 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background transition-colors duration-300">
+    <div className="min-h-screen bg-background transition-colors duration-500">
       <div className="max-w-7xl mx-auto px-4 py-6 md:py-8">
         {/* Header */}
-        <header className="mb-6 md:mb-8">
+        <motion.header 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-6 md:mb-8"
+        >
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">Study Dashboard</h1>
-              <p className="text-muted-foreground">
+              <h1 className="text-3xl md:text-4xl font-semibold text-primary mb-2">Study Dashboard</h1>
+              <p className="text-muted-foreground text-sm">
                 Start date: Oct 18 — Mark each lesson done as you complete it
               </p>
             </div>
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={jumpToToday}
-                aria-label="Jump to today's lesson"
-              >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                Today
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setDarkMode(!darkMode)}
-                aria-label={`Switch to ${darkMode ? "light" : "dark"} mode`}
-              >
-                {darkMode ? (
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={jumpToToday}
+                  aria-label="Jump to today's lesson"
+                  className="glass"
+                >
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
-                ) : (
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                  </svg>
-                )}
-              </Button>
+                  Today
+                </Button>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setDarkMode(!darkMode)}
+                  aria-label={`Switch to ${darkMode ? "light" : "dark"} mode`}
+                  className="glass"
+                >
+                  {darkMode ? (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                  ) : (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    </svg>
+                  )}
+                </Button>
+              </motion.div>
             </div>
           </div>
 
           {/* Progress Bar */}
-          <div className="mb-6">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-sm font-medium text-foreground">Overall Progress</span>
-              <span className="text-sm font-semibold text-primary">
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="mb-6 glass-strong p-5 rounded-2xl shadow-lg"
+          >
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-sm font-semibold text-foreground">Overall Progress</span>
+              <span className="text-sm font-bold text-accent">
                 {completedLessons} / {totalLessons} ({progressPercent}%)
               </span>
             </div>
             <div
-              className="w-full bg-secondary rounded-full h-3 overflow-hidden"
+              className="w-full bg-secondary/30 rounded-full h-3 overflow-hidden backdrop-blur-sm"
               role="progressbar"
               aria-valuenow={progressPercent}
               aria-valuemin={0}
               aria-valuemax={100}
               aria-label={`Study progress: ${progressPercent}% complete`}
             >
-              <div
-                className="bg-primary h-full transition-all duration-500 ease-smooth rounded-full"
-                style={{ width: `${progressPercent}%` }}
+              <motion.div
+                className="bg-accent h-full rounded-full shadow-md"
+                initial={{ width: 0 }}
+                animate={{ width: `${progressPercent}%` }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
               />
             </div>
-          </div>
+          </motion.div>
 
           {/* Subject Progress */}
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-6">
-            {uniqueSubjects.map((subject) => {
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-6"
+          >
+            {uniqueSubjects.map((subject, idx) => {
               const { completed, total } = subjectProgress[subject];
               const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
               return (
-                <div key={subject} className="bg-card p-3 rounded-lg border border-border">
-                  <div className="text-xs font-medium text-muted-foreground mb-1 truncate" title={subject}>
+                <motion.div 
+                  key={subject}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.05 * idx }}
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  className="glass p-3 rounded-xl shadow-md"
+                >
+                  <div className="text-xs font-semibold text-muted-foreground mb-1 truncate" title={subject}>
                     {subject}
                   </div>
-                  <div className="text-sm font-semibold text-foreground">
+                  <div className="text-sm font-bold text-primary">
                     {completed}/{total}
                   </div>
-                  <div className="w-full bg-secondary rounded-full h-1.5 mt-2">
-                    <div
-                      className="bg-accent h-full rounded-full transition-all duration-300"
-                      style={{ width: `${percent}%` }}
+                  <div className="w-full bg-secondary/30 rounded-full h-1.5 mt-2 overflow-hidden">
+                    <motion.div
+                      className="bg-accent h-full rounded-full"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${percent}%` }}
+                      transition={{ duration: 0.6, delay: 0.1 * idx }}
                     />
                   </div>
-                </div>
+                </motion.div>
               );
             })}
-          </div>
+          </motion.div>
 
           {/* Controls */}
-          <div className="flex flex-col md:flex-row gap-3 mb-6">
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="flex flex-col md:flex-row gap-3 mb-6"
+          >
             <Input
               type="text"
               placeholder="Search subjects or dates..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1"
+              className="flex-1 glass border-border/50"
               aria-label="Search lessons"
             />
             <Select value={filter} onValueChange={setFilter}>
-              <SelectTrigger className="w-full md:w-40" aria-label="Filter by status">
+              <SelectTrigger className="w-full md:w-40 glass border-border/50" aria-label="Filter by status">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
-              <SelectContent className="bg-popover z-50">
+              <SelectContent className="glass-strong z-50">
                 <SelectItem value="all">All Lessons</SelectItem>
                 <SelectItem value="done">Done</SelectItem>
                 <SelectItem value="notDone">Not Done</SelectItem>
               </SelectContent>
             </Select>
             <Select value={subjectFilter} onValueChange={setSubjectFilter}>
-              <SelectTrigger className="w-full md:w-48" aria-label="Filter by subject">
+              <SelectTrigger className="w-full md:w-48 glass border-border/50" aria-label="Filter by subject">
                 <SelectValue placeholder="Subject" />
               </SelectTrigger>
-              <SelectContent className="bg-popover z-50 max-h-80">
+              <SelectContent className="glass-strong z-50 max-h-80">
                 <SelectItem value="all">All Subjects</SelectItem>
                 {uniqueSubjects.map((subject) => (
                   <SelectItem key={subject} value={subject}>
@@ -344,133 +382,180 @@ const Index = () => {
                 ))}
               </SelectContent>
             </Select>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCompactView(!compactView)}
-              className="whitespace-nowrap"
-            >
-              {compactView ? (
-                <>
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
-                  Compact
-                </>
-              ) : (
-                <>
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                  </svg>
-                  Cards
-                </>
-              )}
-            </Button>
-          </div>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCompactView(!compactView)}
+                className="whitespace-nowrap glass border-border/50"
+              >
+                {compactView ? (
+                  <>
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                    Compact
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                    </svg>
+                    Cards
+                  </>
+                )}
+              </Button>
+            </motion.div>
+          </motion.div>
 
           {/* Action Buttons */}
-          <div className="flex flex-wrap gap-2">
-            <Button variant="destructive" size="sm" onClick={resetProgress}>
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-              Reset Progress
-            </Button>
-            <Button variant="outline" size="sm" onClick={exportProgress}>
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              Export Progress
-            </Button>
-            <Button variant="outline" size="sm" onClick={importProgress}>
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-              </svg>
-              Import Progress
-            </Button>
-          </div>
-        </header>
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="flex flex-wrap gap-2"
+          >
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button variant="destructive" size="sm" onClick={resetProgress} className="shadow-md">
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Reset Progress
+              </Button>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button variant="outline" size="sm" onClick={exportProgress} className="glass border-border/50">
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Export Progress
+              </Button>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button variant="outline" size="sm" onClick={importProgress} className="glass border-border/50">
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                Import Progress
+              </Button>
+            </motion.div>
+          </motion.div>
+        </motion.header>
 
         {/* Schedule Grid */}
-        <div className={compactView ? "space-y-2" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"}>
-          {filteredDays.length === 0 ? (
-            <div className="col-span-full text-center py-12 text-muted-foreground">
-              No lessons match your filters
-            </div>
-          ) : (
-            filteredDays.map((day) => {
-              if (!day) return null;
-              const dayIsToday = isToday(day.date);
+        <AnimatePresence mode="popLayout">
+          <div className={compactView ? "space-y-3" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"}>
+            {filteredDays.length === 0 ? (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="col-span-full text-center py-12 text-muted-foreground"
+              >
+                No lessons match your filters
+              </motion.div>
+            ) : (
+              filteredDays.map((day, idx) => {
+                if (!day) return null;
+                const dayIsToday = isToday(day.date);
 
-              return (
-                <Card
-                  key={day.dayIdx}
-                  id={`day-${day.dayIdx}`}
-                  ref={dayIsToday ? todayRef : null}
-                  className={`
-                    ${compactView ? "p-3" : "p-4"}
-                    transition-all duration-300 hover:shadow-md
-                    ${dayIsToday ? "ring-2 ring-primary" : ""}
-                  `}
-                >
-                  <div className={`flex ${compactView ? "flex-row items-center" : "flex-col"} justify-between mb-3`}>
-                    <div className={compactView ? "flex-1" : ""}>
-                      <div className="flex items-center gap-2">
-                        <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-primary text-primary-foreground text-xs font-bold">
-                          {day.day}
-                        </span>
-                        <h3 className="font-semibold text-foreground">
-                          {formatDate(day.date)}
-                        </h3>
-                        {dayIsToday && (
-                          <span className="text-xs bg-accent text-accent-foreground px-2 py-0.5 rounded-full font-medium">
-                            Today
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    {!compactView && <div className="text-xs text-muted-foreground">{day.date}</div>}
-                  </div>
-
-                  <div className="space-y-2">
-                    {day.subjects.map((subject) => {
-                      const isCompleted = progress[`${day.dayIdx}-${subject.subIdx}`];
-                      return (
-                        <label
-                          key={subject.subIdx}
-                          className={`
-                            flex items-center gap-3 p-2 rounded-lg border border-border cursor-pointer
-                            transition-all duration-200 hover:bg-secondary/50
-                            ${isCompleted ? "bg-success/10 border-success/30" : ""}
-                          `}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={isCompleted}
-                            onChange={() => toggleLesson(day.dayIdx, subject.subIdx)}
-                            className="w-5 h-5 rounded border-2 border-border text-success focus:ring-2 focus:ring-primary focus:ring-offset-0 cursor-pointer"
-                            aria-label={`Mark ${subject.name} lesson ${subject.lesson} as ${isCompleted ? "not done" : "done"}`}
-                          />
-                          <div className="flex-1 min-w-0">
-                            <div className={`font-medium text-sm ${isCompleted ? "line-through text-muted-foreground" : "text-foreground"}`}>
-                              {subject.name}
-                            </div>
-                            <div className="text-xs text-muted-foreground">Lesson {subject.lesson}</div>
+                return (
+                  <motion.div
+                    key={day.dayIdx}
+                    layout
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.3, delay: idx * 0.02 }}
+                    whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                  >
+                    <Card
+                      id={`day-${day.dayIdx}`}
+                      ref={dayIsToday ? todayRef : null}
+                      className={`
+                        ${compactView ? "p-3" : "p-5"}
+                        glass shadow-lg
+                        ${dayIsToday ? "ring-2 ring-accent shadow-accent/20" : ""}
+                      `}
+                    >
+                      <div className={`flex ${compactView ? "flex-row items-center" : "flex-col"} justify-between mb-3`}>
+                        <div className={compactView ? "flex-1" : ""}>
+                          <div className="flex items-center gap-2">
+                            <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-xs font-bold shadow-md">
+                              {day.day}
+                            </span>
+                            <h3 className="font-semibold text-primary">
+                              {formatDate(day.date)}
+                            </h3>
+                            {dayIsToday && (
+                              <motion.span 
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                className="text-xs bg-accent text-accent-foreground px-2 py-1 rounded-full font-semibold shadow-sm"
+                              >
+                                Today
+                              </motion.span>
+                            )}
                           </div>
-                          {isCompleted && (
-                            <svg className="w-5 h-5 text-success flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                            </svg>
-                          )}
-                        </label>
-                      );
-                    })}
-                  </div>
-                </Card>
-              );
-            })
-          )}
-        </div>
+                        </div>
+                        {!compactView && <div className="text-xs text-muted-foreground font-medium">{day.date}</div>}
+                      </div>
+
+                      <div className="space-y-2">
+                        {day.subjects.map((subject) => {
+                          const isCompleted = progress[`${day.dayIdx}-${subject.subIdx}`];
+                          return (
+                            <motion.label
+                              key={subject.subIdx}
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              className={`
+                                flex items-center gap-3 p-3 rounded-xl border cursor-pointer
+                                transition-all duration-200
+                                ${isCompleted 
+                                  ? "bg-success/10 border-success/30 glass" 
+                                  : "glass border-border/40 hover:border-accent/50"
+                                }
+                              `}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={isCompleted}
+                                onChange={() => toggleLesson(day.dayIdx, subject.subIdx)}
+                                className="w-5 h-5 rounded border-2 border-border text-accent focus:ring-2 focus:ring-accent focus:ring-offset-0 cursor-pointer transition-all"
+                                aria-label={`Mark ${subject.name} lesson ${subject.lesson} as ${isCompleted ? "not done" : "done"}`}
+                              />
+                              <div className="flex-1 min-w-0">
+                                <div className={`font-semibold text-sm ${isCompleted ? "line-through text-muted-foreground" : "text-primary"}`}>
+                                  {subject.name}
+                                </div>
+                                <div className="text-xs text-muted-foreground font-medium">Lesson {subject.lesson}</div>
+                              </div>
+                              <AnimatePresence>
+                                {isCompleted && (
+                                  <motion.svg 
+                                    initial={{ scale: 0, rotate: -180 }}
+                                    animate={{ scale: 1, rotate: 0 }}
+                                    exit={{ scale: 0, rotate: 180 }}
+                                    transition={{ duration: 0.3 }}
+                                    className="w-5 h-5 text-success flex-shrink-0" 
+                                    fill="currentColor" 
+                                    viewBox="0 0 20 20"
+                                  >
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                  </motion.svg>
+                                )}
+                              </AnimatePresence>
+                            </motion.label>
+                          );
+                        })}
+                      </div>
+                    </Card>
+                  </motion.div>
+                );
+              })
+            )}
+          </div>
+        </AnimatePresence>
       </div>
     </div>
   );

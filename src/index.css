@@ -8,73 +8,79 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 270 30% 98%;
-    --foreground: 270 15% 15%;
+    --background: 45 56% 91%;
+    --foreground: 20 29% 29%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 270 15% 15%;
+    --card: 45 56% 96%;
+    --card-foreground: 20 29% 29%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 270 15% 15%;
+    --popover: 45 56% 96%;
+    --popover-foreground: 20 29% 29%;
 
-    --primary: 270 70% 55%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 20 29% 29%;
+    --primary-foreground: 45 56% 91%;
 
-    --secondary: 270 20% 92%;
-    --secondary-foreground: 270 15% 15%;
+    --secondary: 45 40% 85%;
+    --secondary-foreground: 20 29% 29%;
 
-    --muted: 270 15% 95%;
-    --muted-foreground: 270 10% 45%;
+    --muted: 45 30% 88%;
+    --muted-foreground: 20 20% 50%;
 
-    --accent: 280 65% 60%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 277 23% 48%;
+    --accent-foreground: 45 56% 91%;
 
     --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 270 20% 88%;
-    --input: 270 20% 88%;
-    --ring: 270 70% 55%;
+    --border: 45 30% 82%;
+    --input: 45 30% 82%;
+    --ring: 277 23% 48%;
 
     --success: 150 65% 48%;
     --success-foreground: 0 0% 100%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    --glass-bg: 45 56% 96%;
+    --glass-border: 45 40% 88%;
   }
 
   .dark {
-    --background: 270 30% 8%;
-    --foreground: 270 20% 95%;
+    --background: 20 20% 12%;
+    --foreground: 45 56% 91%;
 
-    --card: 270 28% 12%;
-    --card-foreground: 270 20% 95%;
+    --card: 20 25% 16%;
+    --card-foreground: 45 56% 91%;
 
-    --popover: 270 28% 12%;
-    --popover-foreground: 270 20% 95%;
+    --popover: 20 25% 16%;
+    --popover-foreground: 45 56% 91%;
 
-    --primary: 270 75% 65%;
-    --primary-foreground: 270 30% 8%;
+    --primary: 277 23% 58%;
+    --primary-foreground: 20 20% 12%;
 
-    --secondary: 270 25% 18%;
-    --secondary-foreground: 270 20% 95%;
+    --secondary: 20 20% 20%;
+    --secondary-foreground: 45 56% 91%;
 
-    --muted: 270 25% 15%;
-    --muted-foreground: 270 15% 60%;
+    --muted: 20 20% 18%;
+    --muted-foreground: 45 30% 65%;
 
-    --accent: 280 70% 65%;
-    --accent-foreground: 270 30% 8%;
+    --accent: 277 30% 55%;
+    --accent-foreground: 45 56% 91%;
 
     --destructive: 0 72% 60%;
-    --destructive-foreground: 270 20% 95%;
+    --destructive-foreground: 45 56% 91%;
 
-    --border: 270 25% 20%;
-    --input: 270 25% 20%;
-    --ring: 270 75% 65%;
+    --border: 20 20% 25%;
+    --input: 20 20% 25%;
+    --ring: 277 30% 55%;
 
     --success: 150 65% 55%;
-    --success-foreground: 270 30% 8%;
+    --success-foreground: 20 20% 12%;
+    
+    --glass-bg: 20 25% 16%;
+    --glass-border: 20 20% 28%;
   }
 }
 
@@ -84,6 +90,22 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}
+
+@layer utilities {
+  .glass {
+    background: hsl(var(--glass-bg) / 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--glass-border) / 0.3);
+  }
+  
+  .glass-strong {
+    background: hsl(var(--glass-bg) / 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid hsl(var(--glass-border) / 0.4);
   }
 }
