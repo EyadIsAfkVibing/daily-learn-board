@@ -1,65 +1,21 @@
-import { useState, useEffect, useMemo, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useState, useEffect, useMemo } from "react";
+import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { ENHANCED_SCHEDULE, STORAGE_KEY } from "@/lib/schedule";
+import StreakCounter from "@/components/StreakCounter";
 
-// Hard-coded schedule data
-const SCHEDULE = [
-  { day: 1, date: "2025-10-18", subjects: [{ name: "Arabic Reading", lesson: 1 }, { name: "Science", lesson: 1 }] },
-  { day: 2, date: "2025-10-19", subjects: [{ name: "Arabic Nosoos", lesson: 1 }, { name: "Algebra", lesson: 1 }] },
-  { day: 3, date: "2025-10-20", subjects: [{ name: "Arabic Grammar", lesson: 1 }, { name: "Science", lesson: 2 }] },
-  { day: 4, date: "2025-10-21", subjects: [{ name: "Arabic AlA'dab", lesson: 1 }, { name: "History", lesson: 1 }] },
-  { day: 5, date: "2025-10-22", subjects: [{ name: "Arabic Balagha", lesson: 1 }, { name: "Geometry", lesson: 1 }] },
-  { day: 6, date: "2025-10-23", subjects: [{ name: "Arabic Reading", lesson: 2 }, { name: "Science", lesson: 3 }] },
-  { day: 7, date: "2025-10-24", subjects: [{ name: "Arabic Nosoos", lesson: 2 }, { name: "Trigonometry", lesson: 1 }] },
-  { day: 8, date: "2025-10-25", subjects: [{ name: "Arabic Grammar", lesson: 2 }, { name: "Science", lesson: 4 }] },
-  { day: 9, date: "2025-10-26", subjects: [{ name: "Arabic AlA'dab", lesson: 2 }, { name: "History", lesson: 2 }] },
-  { day: 10, date: "2025-10-27", subjects: [{ name: "Arabic Balagha", lesson: 2 }, { name: "Science", lesson: 5 }] },
-  { day: 11, date: "2025-10-28", subjects: [{ name: "Arabic Reading", lesson: 3 }, { name: "Algebra", lesson: 2 }] },
-  { day: 12, date: "2025-10-29", subjects: [{ name: "Arabic Nosoos", lesson: 3 }, { name: "Science", lesson: 6 }] },
-  { day: 13, date: "2025-10-30", subjects: [{ name: "Arabic Grammar", lesson: 3 }, { name: "History", lesson: 3 }] },
-  { day: 14, date: "2025-10-31", subjects: [{ name: "Arabic AlA'dab", lesson: 3 }, { name: "Science", lesson: 7 }] },
-  { day: 15, date: "2025-11-01", subjects: [{ name: "Arabic Balagha", lesson: 3 }, { name: "Trigonometry", lesson: 2 }] },
-  { day: 16, date: "2025-11-02", subjects: [{ name: "Arabic Nosoos", lesson: 4 }, { name: "Science", lesson: 8 }] },
-  { day: 17, date: "2025-11-03", subjects: [{ name: "Arabic Grammar", lesson: 4 }, { name: "Algebra", lesson: 3 }] },
-  { day: 18, date: "2025-11-04", subjects: [{ name: "Arabic Balagha", lesson: 4 }, { name: "Science", lesson: 9 }] },
-  { day: 19, date: "2025-11-05", subjects: [{ name: "Arabic Nosoos", lesson: 5 }, { name: "Geometry", lesson: 2 }] },
-  { day: 20, date: "2025-11-06", subjects: [{ name: "Arabic Grammar", lesson: 5 }, { name: "Science", lesson: 10 }] },
-  { day: 21, date: "2025-11-07", subjects: [{ name: "History", lesson: 4 }, { name: "Trigonometry", lesson: 3 }] },
-  { day: 22, date: "2025-11-08", subjects: [{ name: "Science", lesson: 11 }, { name: "Algebra", lesson: 4 }] },
-  { day: 23, date: "2025-11-09", subjects: [{ name: "History", lesson: 5 }, { name: "Science", lesson: 12 }] },
-  { day: 24, date: "2025-11-10", subjects: [{ name: "Geometry", lesson: 3 }, { name: "Science", lesson: 13 }] },
-  { day: 25, date: "2025-11-11", subjects: [{ name: "Trigonometry", lesson: 4 }, { name: "Science", lesson: 14 }] },
-  { day: 26, date: "2025-11-12", subjects: [{ name: "History", lesson: 6 }, { name: "Algebra", lesson: 5 }] },
-  { day: 27, date: "2025-11-13", subjects: [{ name: "Geometry", lesson: 4 }, { name: "Trigonometry", lesson: 5 }] },
-  { day: 28, date: "2025-11-14", subjects: [{ name: "History", lesson: 7 }, { name: "Geometry", lesson: 5 }] },
-];
-
-const STORAGE_KEY = "study-dashboard-progress";
-
-interface ProgressData {
-  [key: string]: boolean;
-}
-
-const Index = () => {
-  const [progress, setProgress] = useState<ProgressData>({});
+const CleanDashboard = () => {
+  const navigate = useNavigate();
+  const [progress, setProgress] = useState<{ [key: string]: boolean }>({});
   const [darkMode, setDarkMode] = useState(false);
-  const [filter, setFilter] = useState("all");
-  const [subjectFilter, setSubjectFilter] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [compactView, setCompactView] = useState(false);
-  const todayRef = useRef<HTMLDivElement>(null);
 
-  // Initialize dark mode from system preference
   useEffect(() => {
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     setDarkMode(prefersDark);
   }, []);
 
-  // Apply dark mode class
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add("dark");
@@ -68,7 +24,6 @@ const Index = () => {
     }
   }, [darkMode]);
 
-  // Load progress from localStorage
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
@@ -80,24 +35,10 @@ const Index = () => {
     }
   }, []);
 
-  // Save progress to localStorage
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
-  }, [progress]);
-
-  const toggleLesson = (dayIndex: number, subjectIndex: number) => {
-    const key = `${dayIndex}-${subjectIndex}`;
-    setProgress((prev) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
-  };
-
-  // Calculate total lessons and completed
   const { totalLessons, completedLessons } = useMemo(() => {
     let total = 0;
     let completed = 0;
-    SCHEDULE.forEach((day, dayIdx) => {
+    ENHANCED_SCHEDULE.forEach((day, dayIdx) => {
       day.subjects.forEach((_, subIdx) => {
         total++;
         if (progress[`${dayIdx}-${subIdx}`]) completed++;
@@ -108,10 +49,9 @@ const Index = () => {
 
   const progressPercent = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
-  // Calculate per-subject progress
   const subjectProgress = useMemo(() => {
     const subjects: { [key: string]: { total: number; completed: number } } = {};
-    SCHEDULE.forEach((day, dayIdx) => {
+    ENHANCED_SCHEDULE.forEach((day, dayIdx) => {
       day.subjects.forEach((subject, subIdx) => {
         if (!subjects[subject.name]) {
           subjects[subject.name] = { total: 0, completed: 0 };
@@ -127,438 +67,202 @@ const Index = () => {
 
   const uniqueSubjects = Object.keys(subjectProgress).sort();
 
-  // Helper functions
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr + "T00:00:00");
-    return date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
-  };
-
-  const isToday = (dateStr: string) => {
-    const today = new Date().toISOString().split("T")[0];
-    return dateStr === today;
-  };
-
-  // Filter and search logic
-  const filteredDays = useMemo(() => {
-    return SCHEDULE.map((day, dayIdx) => {
-      const filteredSubjects = day.subjects
-        .map((subject, subIdx) => ({ ...subject, subIdx }))
-        .filter((subject) => {
-          const isCompleted = progress[`${dayIdx}-${subject.subIdx}`];
-
-          // Status filter
-          if (filter === "done" && !isCompleted) return false;
-          if (filter === "notDone" && isCompleted) return false;
-
-          // Subject filter
-          if (subjectFilter !== "all" && subject.name !== subjectFilter) return false;
-
-          // Search filter
-          if (searchQuery) {
-            const query = searchQuery.toLowerCase();
-            const matchesSubject = subject.name.toLowerCase().includes(query);
-            const matchesDate = day.date.includes(query) || formatDate(day.date).toLowerCase().includes(query);
-            if (!matchesSubject && !matchesDate) return false;
-          }
-
-          return true;
-        });
-
-      return filteredSubjects.length > 0 ? { ...day, dayIdx, subjects: filteredSubjects } : null;
-    }).filter(Boolean);
-  }, [filter, subjectFilter, searchQuery, progress]);
-
-  const resetProgress = () => {
-    if (window.confirm("Are you sure you want to reset all progress? This cannot be undone.")) {
-      setProgress({});
-      toast.success("Progress reset successfully");
-    }
-  };
-
-  const exportProgress = () => {
-    const data = JSON.stringify(progress, null, 2);
-    const blob = new Blob([data], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `study-progress-${new Date().toISOString().split("T")[0]}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success("Progress exported successfully");
-  };
-
-  const importProgress = () => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "application/json";
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          try {
-            const data = JSON.parse(event.target?.result as string);
-            setProgress(data);
-            toast.success("Progress imported successfully");
-          } catch (err) {
-            toast.error("Failed to import progress. Invalid file format.");
-          }
-        };
-        reader.readAsText(file);
-      }
-    };
-    input.click();
-  };
-
-  const jumpToToday = () => {
-    const today = new Date().toISOString().split("T")[0];
-    const todayIndex = SCHEDULE.findIndex((day) => day.date === today);
-    if (todayIndex >= 0) {
-      const element = document.getElementById(`day-${todayIndex}`);
-      element?.scrollIntoView({ behavior: "smooth", block: "center" });
-      toast.success("Jumped to today");
-    } else {
-      toast.error("Today is not in the study schedule range");
-    }
-  };
+  const quickActions = [
+    {
+      label: "Today's Lesson",
+      icon: <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>,
+      path: "/",
+      color: "bg-purple-500"
+    },
+    {
+      label: "My Notes",
+      icon: <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>,
+      path: "/notes",
+      color: "bg-blue-500"
+    },
+    {
+      label: "Calendar",
+      icon: <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>,
+      path: "/calendar",
+      color: "bg-green-500"
+    },
+    {
+      label: "Statistics",
+      icon: <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>,
+      path: "/statistics",
+      color: "bg-yellow-500"
+    },
+    {
+      label: "Achievements",
+      icon: <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>,
+      path: "/achievements",
+      color: "bg-orange-500"
+    },
+    {
+      label: "Weekly Summary",
+      icon: <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" /></svg>,
+      path: "/weekly-summary",
+      color: "bg-red-500"
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-background transition-colors duration-500">
       <div className="max-w-7xl mx-auto px-4 py-6 md:py-8">
         {/* Header */}
-        <motion.header 
+        <motion.header
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="mb-6 md:mb-8"
+          className="mb-8"
         >
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-3xl md:text-4xl font-semibold text-primary mb-2">Study Dashboard</h1>
-              <p className="text-muted-foreground text-sm">
-                Start date: Oct 18 — Mark each lesson done as you complete it
+              <h1 className="text-4xl md:text-5xl font-bold text-primary mb-2">
+                Welcome Back! 👋
+              </h1>
+              <p className="text-muted-foreground text-lg">
+                Ready to continue your learning journey?
               </p>
             </div>
-            <div className="flex gap-2">
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={jumpToToday}
-                  aria-label="Jump to today's lesson"
-                  className="glass"
-                >
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  Today
-                </Button>
-              </motion.div>
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setDarkMode(!darkMode)}
-                  aria-label={`Switch to ${darkMode ? "light" : "dark"} mode`}
-                  className="glass"
-                >
-                  {darkMode ? (
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                    </svg>
-                  ) : (
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                    </svg>
-                  )}
-                </Button>
-              </motion.div>
-            </div>
-          </div>
-
-          {/* Progress Bar */}
-          <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="mb-6 glass-strong p-5 rounded-2xl shadow-lg"
-          >
-            <div className="flex justify-between items-center mb-3">
-              <span className="text-sm font-semibold text-foreground">Overall Progress</span>
-              <span className="text-sm font-bold text-accent">
-                {completedLessons} / {totalLessons} ({progressPercent}%)
-              </span>
-            </div>
-            <div
-              className="w-full bg-secondary/30 rounded-full h-3 overflow-hidden backdrop-blur-sm"
-              role="progressbar"
-              aria-valuenow={progressPercent}
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-label={`Study progress: ${progressPercent}% complete`}
-            >
-              <motion.div
-                className="bg-accent h-full rounded-full shadow-md"
-                initial={{ width: 0 }}
-                animate={{ width: `${progressPercent}%` }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-              />
-            </div>
-          </motion.div>
-
-          {/* Subject Progress */}
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-6"
-          >
-            {uniqueSubjects.map((subject, idx) => {
-              const { completed, total } = subjectProgress[subject];
-              const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
-              return (
-                <motion.div 
-                  key={subject}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: 0.05 * idx }}
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  className="glass p-3 rounded-xl shadow-md"
-                >
-                  <div className="text-xs font-semibold text-muted-foreground mb-1 truncate" title={subject}>
-                    {subject}
-                  </div>
-                  <div className="text-sm font-bold text-primary">
-                    {completed}/{total}
-                  </div>
-                  <div className="w-full bg-secondary/30 rounded-full h-1.5 mt-2 overflow-hidden">
-                    <motion.div
-                      className="bg-accent h-full rounded-full"
-                      initial={{ width: 0 }}
-                      animate={{ width: `${percent}%` }}
-                      transition={{ duration: 0.6, delay: 0.1 * idx }}
-                    />
-                  </div>
-                </motion.div>
-              );
-            })}
-          </motion.div>
-
-          {/* Controls */}
-          <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="flex flex-col md:flex-row gap-3 mb-6"
-          >
-            <Input
-              type="text"
-              placeholder="Search subjects or dates..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 glass border-border/50"
-              aria-label="Search lessons"
-            />
-            <Select value={filter} onValueChange={setFilter}>
-              <SelectTrigger className="w-full md:w-40 glass border-border/50" aria-label="Filter by status">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent className="glass-strong z-50">
-                <SelectItem value="all">All Lessons</SelectItem>
-                <SelectItem value="done">Done</SelectItem>
-                <SelectItem value="notDone">Not Done</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={subjectFilter} onValueChange={setSubjectFilter}>
-              <SelectTrigger className="w-full md:w-48 glass border-border/50" aria-label="Filter by subject">
-                <SelectValue placeholder="Subject" />
-              </SelectTrigger>
-              <SelectContent className="glass-strong z-50 max-h-80">
-                <SelectItem value="all">All Subjects</SelectItem>
-                {uniqueSubjects.map((subject) => (
-                  <SelectItem key={subject} value={subject}>
-                    {subject}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCompactView(!compactView)}
-                className="whitespace-nowrap glass border-border/50"
+                onClick={() => setDarkMode(!darkMode)}
+                className="glass"
               >
-                {compactView ? (
-                  <>
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                    Compact
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                    </svg>
-                    Cards
-                  </>
-                )}
+                {darkMode ? "☀️ Light" : "🌙 Dark"}
               </Button>
             </motion.div>
-          </motion.div>
+          </div>
 
-          {/* Action Buttons */}
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="flex flex-wrap gap-2"
+          {/* Overall Progress */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="mb-8"
           >
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button variant="destructive" size="sm" onClick={resetProgress} className="shadow-md">
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-                Reset Progress
-              </Button>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button variant="outline" size="sm" onClick={exportProgress} className="glass border-border/50">
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                Export Progress
-              </Button>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button variant="outline" size="sm" onClick={importProgress} className="glass border-border/50">
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                </svg>
-                Import Progress
-              </Button>
-            </motion.div>
+            <Card className="glass-strong p-6 shadow-xl">
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-lg font-bold text-foreground">Overall Progress</span>
+                <span className="text-lg font-bold text-accent">
+                  {completedLessons} / {totalLessons} ({progressPercent}%)
+                </span>
+              </div>
+              <div className="w-full bg-secondary/30 rounded-full h-4 overflow-hidden">
+                <motion.div
+                  className="bg-gradient-to-r from-purple-500 to-blue-500 h-full rounded-full shadow-lg"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progressPercent}%` }}
+                  transition={{ duration: 1, ease: "easeOut" }}
+                />
+              </div>
+            </Card>
           </motion.div>
         </motion.header>
 
-        {/* Schedule Grid */}
-        <AnimatePresence mode="popLayout">
-          <div className={compactView ? "space-y-3" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"}>
-            {filteredDays.length === 0 ? (
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="col-span-full text-center py-12 text-muted-foreground"
+        {/* Quick Actions Grid */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mb-8"
+        >
+          <h2 className="text-2xl font-bold text-primary mb-4">⚡ Quick Actions</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {quickActions.map((action, idx) => (
+              <motion.div
+                key={action.path}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: idx * 0.05 }}
+                whileHover={{ scale: 1.05, y: -5 }}
+                whileTap={{ scale: 0.95 }}
               >
-                No lessons match your filters
+                <Card
+                  onClick={() => navigate(action.path)}
+                  className={`${action.color} p-6 cursor-pointer text-center shadow-lg hover:shadow-xl transition-all`}
+                >
+                  <div className="text-4xl mb-2">{action.icon}</div>
+                  <div className="text-white font-semibold text-sm">{action.label}</div>
+                </Card>
               </motion.div>
-            ) : (
-              filteredDays.map((day, idx) => {
-                if (!day) return null;
-                const dayIsToday = isToday(day.date);
-
-                return (
-                  <motion.div
-                    key={day.dayIdx}
-                    layout
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.3, delay: idx * 0.02 }}
-                    whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                  >
-                    <Card
-                      id={`day-${day.dayIdx}`}
-                      ref={dayIsToday ? todayRef : null}
-                      className={`
-                        ${compactView ? "p-3" : "p-5"}
-                        glass shadow-lg
-                        ${dayIsToday ? "ring-2 ring-accent shadow-accent/20" : ""}
-                      `}
-                    >
-                      <div className={`flex ${compactView ? "flex-row items-center" : "flex-col"} justify-between mb-3`}>
-                        <div className={compactView ? "flex-1" : ""}>
-                          <div className="flex items-center gap-2">
-                            <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-xs font-bold shadow-md">
-                              {day.day}
-                            </span>
-                            <h3 className="font-semibold text-primary">
-                              {formatDate(day.date)}
-                            </h3>
-                            {dayIsToday && (
-                              <motion.span 
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
-                                className="text-xs bg-accent text-accent-foreground px-2 py-1 rounded-full font-semibold shadow-sm"
-                              >
-                                Today
-                              </motion.span>
-                            )}
-                          </div>
-                        </div>
-                        {!compactView && <div className="text-xs text-muted-foreground font-medium">{day.date}</div>}
-                      </div>
-
-                      <div className="space-y-2">
-                        {day.subjects.map((subject) => {
-                          const isCompleted = progress[`${day.dayIdx}-${subject.subIdx}`];
-                          return (
-                            <motion.label
-                              key={subject.subIdx}
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
-                              className={`
-                                flex items-center gap-3 p-3 rounded-xl border cursor-pointer
-                                transition-all duration-200
-                                ${isCompleted 
-                                  ? "bg-success/10 border-success/30 glass" 
-                                  : "glass border-border/40 hover:border-accent/50"
-                                }
-                              `}
-                            >
-                              <input
-                                type="checkbox"
-                                checked={isCompleted}
-                                onChange={() => toggleLesson(day.dayIdx, subject.subIdx)}
-                                className="w-5 h-5 rounded border-2 border-border text-accent focus:ring-2 focus:ring-accent focus:ring-offset-0 cursor-pointer transition-all"
-                                aria-label={`Mark ${subject.name} lesson ${subject.lesson} as ${isCompleted ? "not done" : "done"}`}
-                              />
-                              <div className="flex-1 min-w-0">
-                                <div className={`font-semibold text-sm ${isCompleted ? "line-through text-muted-foreground" : "text-primary"}`}>
-                                  {subject.name}
-                                </div>
-                                <div className="text-xs text-muted-foreground font-medium">Lesson {subject.lesson}</div>
-                              </div>
-                              <AnimatePresence>
-                                {isCompleted && (
-                                  <motion.svg 
-                                    initial={{ scale: 0, rotate: -180 }}
-                                    animate={{ scale: 1, rotate: 0 }}
-                                    exit={{ scale: 0, rotate: 180 }}
-                                    transition={{ duration: 0.3 }}
-                                    className="w-5 h-5 text-success flex-shrink-0" 
-                                    fill="currentColor" 
-                                    viewBox="0 0 20 20"
-                                  >
-                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                  </motion.svg>
-                                )}
-                              </AnimatePresence>
-                            </motion.label>
-                          );
-                        })}
-                      </div>
-                    </Card>
-                  </motion.div>
-                );
-              })
-            )}
+            ))}
           </div>
-        </AnimatePresence>
+        </motion.div>
+
+        {/* Streak Counter */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="mb-8"
+        >
+          <StreakCounter progress={progress} />
+        </motion.div>
+
+        {/* Subject Progress Overview */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+        >
+          <h2 className="text-2xl font-bold text-primary mb-4">📚 Subject Progress</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {uniqueSubjects.map((subject, idx) => {
+              const { completed, total } = subjectProgress[subject];
+              const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+              return (
+                <motion.div
+                  key={subject}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.05 * idx }}
+                  whileHover={{ scale: 1.03, y: -3 }}
+                >
+                  <Card className="glass p-4 shadow-md hover:shadow-lg transition-all">
+                    <div className="text-sm font-bold text-muted-foreground mb-2 truncate" title={subject}>
+                      {subject}
+                    </div>
+                    <div className="text-2xl font-bold text-primary mb-2">
+                      {completed}/{total}
+                    </div>
+                    <div className="w-full bg-secondary/30 rounded-full h-2 overflow-hidden">
+                      <motion.div
+                        className="bg-accent h-full rounded-full"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${percent}%` }}
+                        transition={{ duration: 0.6, delay: 0.1 * idx }}
+                      />
+                    </div>
+                    <div className="text-xs text-accent font-bold mt-1">{percent}%</div>
+                  </Card>
+                </motion.div>
+              );
+            })}
+          </div>
+        </motion.div>
+
+        {/* Motivational Quote */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+          className="mt-8"
+        >
+          <Card className="glass-strong p-8 text-center">
+            <div className="text-6xl mb-4">💡</div>
+            <p className="text-xl font-semibold text-primary mb-2">
+              "The expert in anything was once a beginner."
+            </p>
+            <p className="text-sm text-muted-foreground">Keep pushing forward! 🚀</p>
+          </Card>
+        </motion.div>
       </div>
     </div>
   );
 };
 
-export default Index;
+export default CleanDashboard;
