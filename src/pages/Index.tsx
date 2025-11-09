@@ -11,10 +11,7 @@ const CleanDashboard = () => {
   const [progress, setProgress] = useState<{ [key: string]: boolean }>({});
   const [darkMode, setDarkMode] = useState(false);
 
-  useEffect(() => {
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    setDarkMode(prefersDark);
-  }, []);
+
 
   useEffect(() => {
     if (darkMode) {

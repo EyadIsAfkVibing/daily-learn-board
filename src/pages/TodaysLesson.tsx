@@ -1,5 +1,5 @@
 // This replaces your existing TodaysLesson.tsx
-// Key Changes: Click on lesson card opens Focus Mode with notes on side
+// Key Changes: Shows next incomplete day instead of strictly today's date
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -29,9 +29,11 @@ const TodaysLesson = () => {
 
     useEffect(() => {
         const saved = localStorage.getItem(STORAGE_KEY);
+        let loadedProgress = {};
         if (saved) {
             try {
-                setProgress(JSON.parse(saved));
+                loadedProgress = JSON.parse(saved);
+                setProgress(loadedProgress);
             } catch (e) {
                 console.error("Failed to parse saved progress", e);
             }
@@ -46,13 +48,34 @@ const TodaysLesson = () => {
             }
         }
 
-        const today = new Date().toISOString().split("T")[0];
-        const todayIndex = ENHANCED_SCHEDULE.findIndex((day: any) => day.date === today);
+        // Find next incomplete day
+        let foundDay = null;
+        let foundIndex = -1;
 
-        if (todayIndex >= 0) {
-            setTodaySchedule(ENHANCED_SCHEDULE[todayIndex]);
-            setDayIndex(todayIndex);
+        for (let i = 0; i < ENHANCED_SCHEDULE.length; i++) {
+            const day = ENHANCED_SCHEDULE[i];
+            let allComplete = true;
+
+            for (let j = 0; j < day.subjects.length; j++) {
+                const key = `${i}-${j}`;
+                if (!loadedProgress[key]) {
+                    allComplete = false;
+                    break;
+                }
+            }
+
+            if (!allComplete) {
+                foundDay = day;
+                foundIndex = i;
+                break;
+            }
+        }
+
+        if (foundDay) {
+            setTodaySchedule(foundDay);
+            setDayIndex(foundIndex);
         } else {
+            // All lessons complete!
             navigate("/dashboard");
         }
     }, [navigate]);
@@ -118,7 +141,7 @@ const TodaysLesson = () => {
 
         if (newCompleted.size === todaySchedule.subjects.length) {
             setTimeout(() => {
-                navigate("/dashboard");
+                window.location.reload(); // Reload to load next day
             }, 2000);
         }
     };
@@ -140,9 +163,7 @@ const TodaysLesson = () => {
                     animate={{ opacity: 1, scale: 1 }}
                     className="text-center"
                 >
-                    <h2 className="text-2xl font-bold text-primary mb-4">No Lesson Today! 🎉</h2>
-                    <p className="text-muted-foreground mb-6">Enjoy your day off!</p>
-                    <Button onClick={() => navigate("/dashboard")}>Go to Dashboard</Button>
+                    <h2 className="text-2xl font-bold text-primary mb-4">Loading... 📚</h2>
                 </motion.div>
             </div>
         );
@@ -319,10 +340,10 @@ const TodaysLesson = () => {
                                 className="text-center mb-8"
                             >
                                 <h1 className="text-5xl font-bold text-primary mb-3 neon-text">
-                                    Today's Lessons
+                                    Next Lessons
                                 </h1>
                                 <p className="text-muted-foreground text-lg">
-                                    {new Date().toLocaleDateString("en-US", {
+                                    Day {todaySchedule.day} - {new Date(todaySchedule.date).toLocaleDateString("en-US", {
                                         weekday: "long",
                                         month: "long",
                                         day: "numeric"
