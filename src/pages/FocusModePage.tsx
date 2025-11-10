@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
+import FloatingVideoCard from '../components/FloatingVideoCard';
 
 const FocusMode = () => {
     const [isActive, setIsActive] = useState(false);
@@ -11,6 +12,25 @@ const FocusMode = () => {
     const [isRunning, setIsRunning] = useState(false);
     const [mode, setMode] = useState<"focus" | "break">("focus");
     const [focusSessions, setFocusSessions] = useState(0);
+    const [youtubeUrl, setYoutubeUrl] = useState('');
+    const [videoId, setVideoId] = useState<string | null>(null);
+
+    const extractVideoId = (url: string) => {
+        const match = url.match(/(?:youtube\.com\/.*v=|youtu\.be\/)([^&]+)/);
+        return match ? match[1] : null;
+    };
+
+    const handleAddVideo = () => {
+        const id = extractVideoId(youtubeUrl);
+        if (id) {
+            setVideoId(id);
+            toast.success("Video added!");
+            setYoutubeUrl('');
+        } else {
+            toast.error("Invalid YouTube link.");
+        }
+    };
+
 
     useEffect(() => {
         let interval: NodeJS.Timeout;
@@ -79,7 +99,27 @@ const FocusMode = () => {
 
     if (!isActive) {
         return (
+
             <div className="space-y-6">
+                <Card className="glass p-8 text-center"></Card>
+                <div className="youtube-input-container">
+                    <input
+                        type="text"
+                        placeholder="Paste YouTube link..."
+                        value={youtubeUrl}
+                        onChange={(e) => setYoutubeUrl(e.target.value)}
+                        className="border px-4 py-2 rounded-md w-64"
+                    />
+                    <motion.button
+                        onClick={handleAddVideo}
+                        whileHover={{ scale: 1.1, rotate: -2 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="animated-button ml-4 px-6 py-2 rounded-md bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold shadow-lg"
+                    >
+                        🎬 Add Video
+                    </motion.button>
+                </div>
+
                 <div>
                     <h2 className="text-3xl font-bold text-primary mb-2 flex items-center gap-2">
                         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -161,6 +201,10 @@ const FocusMode = () => {
                         </li>
                     </ul>
                 </Card>
+                {videoId && (
+                    <FloatingVideoCard videoId={videoId} onClose={() => setVideoId(null)} />
+                )}
+
             </div>
         );
     }
@@ -250,6 +294,30 @@ const FocusMode = () => {
                     <div className="mt-8 text-white/60 text-lg">
                         Sessions Completed: {focusSessions}
                     </div>
+
+                    <div className="mt-8 flex justify-center items-center gap-4 flex-wrap">
+                        <input
+                            type="text"
+                            placeholder="Paste YouTube link..."
+                            value={youtubeUrl}
+                            onChange={(e) => setYoutubeUrl(e.target.value)}
+                            className="border px-4 py-2 rounded-md w-64"
+                        />
+                        <motion.button
+                            onClick={handleAddVideo}
+                            whileHover={{ scale: 1.1, rotate: -2 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="animated-button px-6 py-2 rounded-md bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold shadow-lg"
+                        >
+                            🎬 Add Video
+                        </motion.button>
+                    </div>
+
+
+                    {videoId && (
+                        <FloatingVideoCard videoId={videoId} onClose={() => setVideoId(null)} />
+                    )}
+
                 </motion.div>
             </div>
 
@@ -266,6 +334,9 @@ const FocusMode = () => {
                 transition={{ duration: 10, repeat: Infinity }}
             />
         </motion.div>
+
+
+
     );
 };
 

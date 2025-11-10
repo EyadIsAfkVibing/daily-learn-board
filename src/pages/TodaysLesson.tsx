@@ -1,6 +1,7 @@
 // This replaces your existing TodaysLesson.tsx
 // Key Changes: Shows next incomplete day instead of strictly today's date
 
+import FloatingVideoCard from '../components/FloatingVideoCard';
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -11,7 +12,26 @@ import confetti from "canvas-confetti";
 import { toast } from "sonner";
 import { ENHANCED_SCHEDULE, STORAGE_KEY, NOTES_STORAGE_KEY, getLessonDisplayName } from "@/lib/schedule";
 
+
 const TodaysLesson = () => {
+    const [youtubeUrl, setYoutubeUrl] = useState('');
+    const [videoId, setVideoId] = useState<string | null>(null);
+
+    const extractVideoId = (url: string) => {
+        const match = url.match(/(?:youtube\.com\/.*v=|youtu\.be\/)([^&]+)/);
+        return match ? match[1] : null;
+    };
+
+    const handleAddVideo = () => {
+        const id = extractVideoId(youtubeUrl);
+        if (id) {
+            setVideoId(id);
+            toast.success("Video added!");
+            setYoutubeUrl('');
+        } else {
+            toast.error("Invalid YouTube link.");
+        }
+    };
     const navigate = useNavigate();
     const [completedLessons, setCompletedLessons] = useState<Set<number>>(new Set());
     const [progress, setProgress] = useState<{ [key: string]: boolean }>({});
@@ -260,6 +280,30 @@ const TodaysLesson = () => {
                         </Button>
                     </div>
 
+                    {/* YouTube Input + Button */}
+                    <div className="mt-8 flex justify-center items-center gap-4 flex-wrap">
+                        <input
+                            type="text"
+                            placeholder="Paste YouTube link..."
+                            value={youtubeUrl}
+                            onChange={(e) => setYoutubeUrl(e.target.value)}
+                            className="border px-4 py-2 rounded-md w-64"
+                        />
+                        <motion.button
+                            onClick={handleAddVideo}
+                            whileHover={{ scale: 1.1, rotate: -2 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="animated-button px-6 py-2 rounded-md bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold shadow-lg"
+                        >
+                            🎬 Add Video
+                        </motion.button>
+                    </div>
+
+                    {/* Floating Video Card */}
+                    {videoId && (
+                        <FloatingVideoCard videoId={videoId} onClose={() => setVideoId(null)} />
+                    )}
+
                     {/* Notes Sidebar */}
                     <motion.div
                         initial={{ x: 300, opacity: 0 }}
@@ -281,6 +325,8 @@ const TodaysLesson = () => {
                         <p className="text-white/40 text-sm mt-4">
                             💡 Tip: Write key concepts, formulas, or important points you learn
                         </p>
+
+
                     </motion.div>
                 </div>
 
