@@ -1,0 +1,830 @@
+================================================================================
+STUDY DASHBOARD - COMPLETE TECHNICAL DOCUMENTATION
+================================================================================
+
+================================================================================
+1) HIGH-LEVEL PURPOSE
+================================================================================
+
+WHAT THE WEBSITE IS FOR:
+- Personal study tracking and lesson management application
+- Designed for Secondary 1 students in Egypt
+- Covers subjects: Arabic (multiple variants), Math, Science, English, History, Trigonometry, Algebra, Similarity
+
+CORE USER GOAL:
+- Track daily lesson completion across an 18-day study schedule
+- Build study streaks and earn achievements
+- Take notes on lessons
+- Stay motivated through gamification
+
+BUSINESS/FUNCTIONAL OBJECTIVE:
+- Increase study consistency through visual progress tracking
+- Gamify learning with achievements and streaks
+- Provide a centralized hub for study materials and notes
+- AI-assisted study support via chat buddy
+
+================================================================================
+2) PAGE STRUCTURE & FLOW
+================================================================================
+
+ROUTES (defined in src/App.tsx):
+- /                     -> TodaysLesson (default entry point)
+- /dashboard           -> Index (CleanDashboard)
+- /statistics          -> Statistics
+- /weekly-summary      -> WeeklySummary
+- /notes               -> NotesPage
+- /achievements        -> AchievementsPage
+- /calendar            -> CalendarPage
+- /reminders           -> RemindersPage
+- /resources           -> ResourcesPage
+- /focus               -> FocusModePage
+- /themes              -> ThemesPage
+- /ai-tips             -> AITipsPage
+- /theme-editor        -> ThemeEditorPage
+- /*                   -> NotFound (404 catch-all)
+
+ENTRY POINT:
+- Root URL (/) loads TodaysLesson page
+- Shows the next incomplete day from the 18-day schedule
+- If all days complete, redirects to /dashboard
+
+NAVIGATION LOGIC:
+- FloatingNav component (fixed bottom-right)
+- Click hamburger button to reveal 12-item grid menu
+- Each menu item navigates to respective route
+- Backdrop click closes menu
+
+USER DECISION POINTS:
+1. On TodaysLesson: Click lesson card to enter Focus Mode
+2. In Focus Mode: Start/pause timer, write notes, mark complete
+3. On Dashboard: Choose quick action or view subject progress
+4. On Calendar: Click scheduled day to view lessons
+5. On Notes: Search, view, rename, or export lessons
+
+FLOW ORDER:
+1. User lands on TodaysLesson
+2. Selects a lesson to study
+3. Enters Focus Mode with Pomodoro timer
+4. Writes notes, marks complete
+5. Confetti celebration on completion
+6. Returns to lesson list or continues
+7. When day complete, page reloads with next day
+
+================================================================================
+3) COMPONENT BREAKDOWN (VERY DETAILED)
+================================================================================
+
+------------------------------------------------------------------------------
+GLOBAL COMPONENTS (Present on all pages)
+------------------------------------------------------------------------------
+
+A) PremiumBackground (src/components/PremiumBackground.tsx)
+   Position: Fixed, full viewport, z-index 0
+   Size: 100vw x 100vh
+   States: Always active (no interactive states)
+   Triggers: Automatic on page load
+   Dependencies: None
+   Elements:
+   - Aurora div with CSS gradient animation
+   - 4 animated gradient orbs (purple, blue, teal, pink)
+   - 20 floating particles with random positions
+   - Grid pattern overlay (50px spacing)
+   - Vignette effect overlay
+   - Scanline effect with opacity animation
+
+B) FloatingNav (src/components/FloatingNav.tsx)
+   Position: Fixed bottom-right (bottom-6 right-6), z-index 50
+   Size: 
+   - Toggle button: 64px x 64px (rounded)
+   - Menu panel: 320px width, auto height
+   States:
+   - Closed: Only toggle button visible with pulse animation
+   - Open: Backdrop + 2-column grid of 12 navigation buttons
+   Triggers:
+   - Click toggle button to open/close
+   - Click backdrop to close
+   - Click nav item to navigate and close
+   Dependencies: react-router-dom useNavigate
+
+C) AIChatBuddy (src/components/AIChatBuddy.tsx)
+   Position: Fixed bottom-24 right-6, z-index 40
+   Size:
+   - Toggle button: 64px x 64px (rounded)
+   - Chat window: 384px x 500px
+   States:
+   - Closed: Only floating button with pulse
+   - Open: Full chat interface
+   - Typing: Shows animated dots when AI responding
+   Triggers:
+   - Click floating button to toggle
+   - Enter key to send message
+   - Shift+Enter for newline
+   - Quick action buttons to prefill prompts
+   Dependencies: OpenRouter API (OpenAI compatible)
+
+D) Toaster (Sonner) - Toast notifications
+   Position: Fixed, default Sonner positioning
+   States: Hidden until triggered, auto-dismiss
+   Triggers: toast.success(), toast.error(), toast.info() calls
+
+------------------------------------------------------------------------------
+PAGE: TodaysLesson (src/pages/TodaysLesson.tsx)
+------------------------------------------------------------------------------
+
+E) TodaysLesson Page
+   Position: Full viewport
+   Size: max-w-6xl mx-auto with padding
+   States:
+   - Loading: Shows "Loading... 📚"
+   - Normal: Shows lesson cards
+   - All Complete: Shows celebration screen
+   - Focus Mode: Full overlay with timer
+
+   Sub-components:
+   
+   E1) Header Section
+       - "Next Lessons" title with neon-text effect
+       - Day number and formatted date
+       - Glowing badge showing completed/total
+   
+   E2) Lesson Cards Grid
+       - Grid: 2 columns (lg:3)
+       - Each card:
+         - Glass background
+         - Subject name and topic
+         - Lesson number badge
+         - Completed state: checkmark, green border
+         - Pending state: clickable to focus mode
+       - Hover: scale 1.03, y -4px
+       - Click: enters Focus Mode
+   
+   E3) Focus Mode Overlay (when active)
+       Position: Fixed inset-0, z-index 50
+       Background: gradient purple/blue/black
+       Elements:
+       - Back button (top-left)
+       - Lesson title with neon effect
+       - Pomodoro timer (8xl font, MM:SS format)
+       - Timer controls: Start/Pause/Reset
+       - Mark Complete button
+       - Notes sidebar (right side, 384px width)
+       - YouTube input field
+       - Floating video card (if video added)
+       - Ambient background animation
+
+   E4) FloatingVideoCard
+       Position: Draggable, resizable
+       Size: Default 400x250, min 300x200, max 800x600
+       States: Normal, dragging, resizing
+       Dependencies: react-rnd
+
+------------------------------------------------------------------------------
+PAGE: Index/Dashboard (src/pages/Index.tsx)
+------------------------------------------------------------------------------
+
+F) Dashboard Page
+   Position: Full viewport
+   Size: max-w-7xl mx-auto
+
+   Sub-components:
+   
+   F1) Header
+       - "Welcome Back! 👋" title
+       - Subtitle text
+       - Dark mode toggle button
+   
+   F2) Overall Progress Card
+       - Glass-strong styling
+       - Label + percentage text
+       - Animated progress bar (purple-blue gradient)
+   
+   F3) Quick Actions Grid
+       - 6 colored cards in row
+       - Icons: Today's Lesson, Notes, Calendar, Statistics, Achievements, Weekly Summary
+       - Hover: scale 1.05, y -5px
+       - Each navigates to respective route
+   
+   F4) StreakCounter Component
+       - Current streak with emoji indicator
+       - Streak message based on count
+       - Longest streak stat
+       - Days completed stat
+       - "Don't break the chain" motivational text
+   
+   F5) Subject Progress Grid
+       - 4 columns (responsive)
+       - Each subject card:
+         - Subject name
+         - Completed/Total count
+         - Progress bar
+         - Percentage
+   
+   F6) Motivational Quote Card
+       - Lightbulb emoji
+       - Inspirational quote
+       - Encouraging message
+
+------------------------------------------------------------------------------
+PAGE: CalendarPage (src/pages/CalendarPage.tsx)
+------------------------------------------------------------------------------
+
+G) Calendar Page
+   Wrapper for CalendarView component with progress state management
+
+   G1) CalendarView (src/components/CalendarView.tsx)
+       Elements:
+       - Month navigation (Previous/Next buttons)
+       - Month/year heading
+       - Day name headers (Sun-Sat)
+       - Calendar grid (7 columns)
+       - Legend showing status colors
+       - Selected day detail panel (AnimatePresence)
+
+       Cell states:
+       - No schedule: opacity 40%, not clickable
+       - Has schedule, incomplete: glass, progress bar
+       - Has schedule, complete: green success border, checkmark
+       - Today: ring-2 ring-accent, pulsing dot
+       - Selected: ring-2 ring-primary
+
+------------------------------------------------------------------------------
+PAGE: Statistics (src/pages/Statistics.tsx)
+------------------------------------------------------------------------------
+
+H) Statistics Page
+   Elements:
+   - Header with back button
+   - 3 overview stat cards (completion %, subjects, completed)
+   - Bar chart: progress by subject (Recharts)
+   - Pie chart: subject distribution (Recharts)
+   - Line chart: daily progress timeline (Recharts)
+   - Detailed table breakdown
+
+------------------------------------------------------------------------------
+PAGE: WeeklySummary (src/pages/WeeklySummary.tsx)
+------------------------------------------------------------------------------
+
+I) Weekly Summary Page
+   Elements:
+   - Week selector buttons (scrollable)
+   - Week overview card with emoji and percentage
+   - Progress bar
+   - Daily breakdown cards grid
+   - Week stats (perfect days, active days, lessons)
+   - Insights panel with conditional messages
+
+------------------------------------------------------------------------------
+PAGE: NotesPage (src/pages/NotesPage.tsx)
+------------------------------------------------------------------------------
+
+J) Notes Page
+   Wrapper for LessonManager component
+
+   J1) LessonManager (src/components/LessonManager.tsx)
+       Elements:
+       - Header with export button
+       - 4 stat cards (total, completed, with notes, renamed)
+       - Search input
+       - Lesson cards grid
+       - Lesson detail modal (AnimatePresence)
+
+       Modal features:
+       - View/edit custom name
+       - Full note textarea
+       - Delete note button
+       - Date and status display
+
+------------------------------------------------------------------------------
+PAGE: AchievementsPage (src/pages/AchievementsPage.tsx)
+------------------------------------------------------------------------------
+
+K) Achievements Page
+   Wrapper for RewardsSystem component
+
+   K1) RewardsSystem (src/components/RewardsSystem.tsx)
+       Elements:
+       - Points header (total points, unlocked count)
+       - Category filter buttons
+       - Achievement cards grid
+       - Achievement detail modal
+
+       Achievement categories:
+       - Lessons (1, 5, 10, 25, 50, all)
+       - Streak (3, 7, 14, 28 days)
+       - Days (5, 10, 20 complete)
+       - Special (weekend, early bird, night owl)
+
+------------------------------------------------------------------------------
+OTHER PAGES (Referenced but not fully detailed)
+------------------------------------------------------------------------------
+
+L) RemindersPage - Study reminder management
+M) ResourcesPage - Study resources links
+N) FocusModePage - Standalone focus/Pomodoro page
+O) ThemesPage - Theme selection
+P) ThemeEditorPage - Custom theme editor
+Q) AITipsPage - AI study tips
+R) NotFound - 404 error page
+
+================================================================================
+4) ANIMATIONS & MOTION
+================================================================================
+
+All animations use Framer Motion unless otherwise noted.
+
+A) PAGE TRANSITIONS
+   Trigger: Route change
+   Duration: 500ms
+   Easing: ease-out (default framer-motion)
+   Transform: y: 20px -> 0, opacity: 0 -> 1
+   Blocks input: No
+
+B) CARD HOVER EFFECTS
+   Trigger: mouseenter
+   Duration: 300ms (Tailwind transition-all)
+   Transform: scale(1.03), translateY(-4px)
+   Purpose: Indicate interactivity
+
+C) PROGRESS BAR ANIMATIONS
+   Trigger: On mount
+   Duration: 600-1000ms
+   Easing: easeOut
+   Transform: width 0% -> target%
+   Purpose: Visual feedback of progress
+
+D) PULSE ANIMATIONS (CSS)
+   Trigger: Continuous
+   Duration: 2000ms
+   Animation: scale 1 -> 1.5, opacity 0.5 -> 0
+   Purpose: Draw attention to buttons
+
+E) FLOATING BUTTON PULSE
+   Trigger: When menu closed
+   Duration: 2000ms infinite
+   Transform: scale 1 -> 1.5, opacity 0.5 -> 0
+   Purpose: Indicate interactivity
+
+F) CONFETTI EFFECT
+   Trigger: Lesson completion, achievement unlock
+   Duration: ~2000ms
+   Library: canvas-confetti
+   Particles: 100-150
+   Spread: 70-80 degrees
+   Purpose: Celebration/delight
+
+G) MENU OPEN/CLOSE
+   Trigger: Toggle button click
+   Duration: ~300ms
+   Easing: spring (stiffness: 200)
+   Transform:
+   - Open: opacity 0->1, scale 0.8->1
+   - Close: opacity 1->0, scale 1->0.8
+   Icon rotation: 0 -> 90 degrees
+   Purpose: Smooth state transition
+
+H) AMBIENT BACKGROUND ORBS
+   Trigger: Continuous
+   Duration: 12-18 seconds
+   Easing: easeInOut
+   Transform: x/y translation, scale 1-1.3
+   Purpose: Visual polish
+
+I) MODAL ANIMATIONS
+   Trigger: Open/close
+   Duration: ~300ms
+   Transform:
+   - Backdrop: opacity 0->1
+   - Content: scale 0.8->1, y 50->0
+   Purpose: Focus attention
+
+J) TIMER DISPLAY PULSE
+   Trigger: When timer running
+   Duration: 2000ms infinite
+   Transform: scale [1, 1.02, 1]
+   Purpose: Indicate active timer
+
+K) STREAK EMOJI PULSE
+   Trigger: Continuous
+   Duration: 2000ms infinite
+   Transform: scale [1, 1.1, 1]
+   Purpose: Highlight streak status
+
+L) NEON TEXT PULSE (CSS)
+   Trigger: Continuous
+   Duration: 2000ms
+   Effect: text-shadow intensity variation
+   Purpose: Premium visual effect
+
+================================================================================
+5) DESIGN SYSTEM
+================================================================================
+
+COLOR PALETTE (HSL values in index.css):
+
+Light Mode:
+- Background: hsl(45, 56%, 91%) - Beige
+- Foreground: hsl(20, 29%, 29%) - Brown
+- Primary: hsl(20, 29%, 29%) - Brown
+- Secondary: hsl(45, 40%, 85%) - Light beige
+- Accent: hsl(277, 23%, 48%) - Purple
+- Muted: hsl(45, 30%, 88%) - Muted beige
+- Success: hsl(150, 65%, 48%) - Green
+- Destructive: hsl(0, 72%, 55%) - Red
+
+Dark Mode:
+- Background: hsl(20, 20%, 12%) - Dark brown
+- Foreground: hsl(45, 56%, 91%) - Beige
+- Primary: hsl(277, 23%, 58%) - Light purple
+- Accent: hsl(277, 30%, 55%) - Purple
+- Success: hsl(150, 65%, 55%) - Green
+
+Body Background Animation:
+- Gradient: #0f172a -> #1e1b4b -> #312e81 -> #1e3a8a -> #0f172a
+- Animation: 15s infinite gradient shift
+
+TYPOGRAPHY:
+- Font family: System sans-serif (via Tailwind)
+- Weights: 400 (normal), 600 (semibold), 700 (bold)
+- Sizes:
+  - xs: 0.75rem
+  - sm: 0.875rem
+  - base: 1rem
+  - lg: 1.125rem
+  - xl: 1.25rem
+  - 2xl: 1.5rem
+  - 3xl: 1.875rem
+  - 4xl: 2.25rem
+  - 5xl: 3rem
+  - 6xl: 3.75rem
+  - 8xl: 6rem
+
+SPACING SYSTEM:
+- Base: 4px (Tailwind's default)
+- Common values: 2 (8px), 3 (12px), 4 (16px), 6 (24px), 8 (32px)
+- Container max-width: 1400px (2xl breakpoint)
+
+BORDER RADIUS:
+- --radius: 1rem (16px)
+- lg: 1rem
+- md: calc(1rem - 2px)
+- sm: calc(1rem - 4px)
+- Full: 9999px
+
+GLASS EFFECTS:
+- .glass: 
+  - background: rgba(255,255,255,0.05)
+  - backdrop-filter: blur(20px)
+  - border: 1px solid rgba(255,255,255,0.1)
+  - box-shadow: 0 8px 32px rgba(0,0,0,0.37)
+
+- .glass-strong:
+  - background: rgba(255,255,255,0.08)
+  - backdrop-filter: blur(25px)
+  - border: 1px solid rgba(255,255,255,0.15)
+
+GRID SYSTEM:
+- 12 column grid via Tailwind
+- Responsive breakpoints: sm(640), md(768), lg(1024), xl(1280), 2xl(1400)
+- Common patterns:
+  - grid-cols-1 md:grid-cols-2 lg:grid-cols-3
+  - grid-cols-2 md:grid-cols-3 lg:grid-cols-4
+
+DARK/LIGHT BEHAVIOR:
+- Uses .dark class on html element
+- Toggle via darkMode useState in Index.tsx
+- CSS variables swap in .dark block
+- Not persisted to localStorage
+
+================================================================================
+6) INTERACTION LOGIC
+================================================================================
+
+A) LESSON COMPLETION FLOW:
+   1. User clicks lesson card on TodaysLesson
+   2. Focus mode activates (if lesson not complete)
+   3. Timer starts automatically (25 min Pomodoro)
+   4. User can pause/reset timer
+   5. User writes notes in sidebar
+   6. User clicks "Mark as Complete"
+   7. Confetti fires, toast shows
+   8. Progress saved to localStorage
+   9. Returns to lesson list
+   10. If all lessons done, page reloads to show next day
+
+B) NAVIGATION INTERACTION:
+   1. Click hamburger button (bottom-right)
+   2. Menu grid appears with backdrop
+   3. Click any nav item
+   4. Navigates to route
+   5. Menu closes automatically
+
+C) AI CHAT INTERACTION:
+   1. Click chat bubble button
+   2. Chat window opens
+   3. Type message or click quick action
+   4. Press Enter to send
+   5. Shows typing indicator
+   6. AI response appears
+   7. Continue conversation or close
+
+D) CALENDAR INTERACTION:
+   1. Navigate months with arrows
+   2. Click any scheduled day (non-grayed)
+   3. Detail panel expands below calendar
+   4. Shows lessons with completion status
+   5. Click X to close detail
+
+E) NOTES SEARCH:
+   1. Type in search input
+   2. Real-time filtering of lesson cards
+   3. Matches: name, topic, note content
+   4. Click card to open detail modal
+
+EDGE CASES:
+- No lessons for today: Shows loading, then finds next incomplete day
+- All lessons complete: Redirects to dashboard
+- Empty search: Shows all lessons
+- Timer at 0:00: Auto-stops, shows toast, confetti
+- Network error in AI chat: Shows error message in chat
+
+ERROR HANDLING:
+- localStorage parse failures: console.error, use empty defaults
+- OpenRouter API errors: Display error in chat window
+- Invalid YouTube URL: Toast error message
+
+DISABLED STATES:
+- Completed lessons: Not clickable for focus mode, shows info toast
+- Send button: Disabled when input empty or AI typing
+- Navigation items: None disabled
+
+================================================================================
+7) DATA FLOW
+================================================================================
+
+DATA SOURCES:
+
+A) SCHEDULE DATA (Static):
+   Source: src/lib/schedule.ts
+   Type: ENHANCED_SCHEDULE array
+   Format: ScheduleDay[] with day, date, subjects
+   18 days starting November 10, 2025
+
+B) PROGRESS DATA (Persisted):
+   Key: "study-dashboard-progress"
+   Type: { [key: string]: boolean }
+   Format: "dayIndex-subjectIndex" -> true/false
+   Storage: localStorage
+
+C) NOTES DATA (Persisted):
+   Key: "study-dashboard-notes"
+   Type: { [key: string]: string }
+   Format: "dayIndex-subjectIndex" -> note text
+   Storage: localStorage
+
+D) CUSTOM LESSON NAMES (Persisted):
+   Key: "custom-lesson-names"
+   Type: { [key: string]: string }
+   Storage: localStorage
+
+E) ACHIEVEMENTS DATA (Persisted):
+   Key: "study-achievements"
+   Type: { [achievementId: string]: boolean }
+   Storage: localStorage
+
+F) SAVED SCHEDULES (Persisted):
+   Key: "study-dashboard-schedules"
+   Type: SavedSchedule[]
+   Storage: localStorage
+
+COMPONENT DATA PASSING:
+- Progress state: Loaded in page components, passed as props to child components
+- Example: CalendarPage loads progress, passes to CalendarView
+- Example: AchievementsPage loads progress, passes to RewardsSystem
+
+HARDCODED VS DYNAMIC:
+- Hardcoded: Schedule structure, achievement definitions, navigation items
+- Dynamic: Completion status, notes, custom names, streak calculations
+
+CACHING:
+- localStorage acts as persistent cache
+- State re-reads from localStorage on component mount
+- No server-side caching (no backend)
+
+================================================================================
+8) PERFORMANCE & TECH ASSUMPTIONS
+================================================================================
+
+RENDERING:
+- React 18 with concurrent features available
+- Client-side only (no SSR)
+- Vite for bundling and HMR
+
+LAZY LOADING:
+- Not implemented for routes
+- Could benefit from React.lazy() for code splitting
+
+ANIMATION PERFORMANCE:
+- Framer Motion uses GPU-accelerated transforms
+- CSS animations use transform and opacity (GPU compositing)
+- Backdrop-filter may cause performance issues on low-end devices
+- Multiple animated background elements could impact mobile performance
+
+BUNDLE CONSIDERATIONS:
+- Heavy dependencies: framer-motion, recharts, openai
+- Could benefit from tree-shaking unused Recharts components
+- canvas-confetti is small (~3KB gzipped)
+
+MEMORY:
+- All data in memory via useState
+- localStorage sync on every write
+- No memory leaks expected (proper cleanup in useEffect)
+
+EXPECTED ISSUES:
+- Background animations may drop frames on mobile
+- Blur effects expensive on low-end devices
+- localStorage has 5MB limit
+
+================================================================================
+9) IMPROVEMENT OPPORTUNITIES (CRITICAL)
+================================================================================
+
+UX FRICTION POINTS:
+
+1. Dark mode toggle not persisted - resets on refresh
+   Impact: User frustration
+   Fix: Add localStorage persistence
+
+2. No loading states for AI chat API calls
+   Impact: User uncertainty
+   Fix: Already has typing indicator, but add error recovery
+
+3. Focus mode timer auto-starts - unexpected behavior
+   Impact: User may not be ready
+   Fix: Add optional auto-start setting
+
+4. YouTube input in Focus Mode not clearly discoverable
+   Impact: Feature goes unused
+   Fix: Add prominent button or panel
+
+5. Calendar starts at November 2025 hardcoded
+   Impact: May confuse users outside date range
+   Fix: Dynamic start month based on schedule
+
+6. No way to "uncomplete" a lesson
+   Impact: Accidents can't be fixed
+   Fix: Add toggle functionality
+
+MISSED MICRO-INTERACTIONS:
+
+1. Button press feedback - only scale, no color change
+2. Form input focus animations missing
+3. Navigation item active state not highlighted
+4. No skeleton loading states
+5. Toast notifications lack consistent icons
+
+ACCESSIBILITY ISSUES:
+
+1. No skip-to-content link
+2. Floating nav not keyboard accessible
+3. Color contrast may fail on glass backgrounds
+4. No aria-labels on icon-only buttons
+5. Timer not announced for screen readers
+6. Confetti animation not reducible (motion preference)
+7. Focus trap not implemented in modals
+
+PERFORMANCE BOTTLENECKS:
+
+1. 20 floating particles always rendering
+2. Multiple background animations always running
+3. No virtualization for lesson list
+4. Recharts loads fully even if not viewed
+5. OpenAI SDK loaded even if chat never used
+6. No image optimization (none used, but consideration)
+
+SCALABILITY LIMITATIONS:
+
+1. localStorage 5MB limit for notes
+2. No sync across devices
+3. No user accounts
+4. Schedule hardcoded, not configurable by user
+5. Single language (English UI)
+6. No data export/backup beyond markdown
+
+================================================================================
+10) CREATIVE UPGRADE PLAN
+================================================================================
+
+CLARITY IMPROVEMENTS:
+
+1. Add onboarding tutorial overlay for first-time users
+   - Highlight key features with tooltips
+   - Explain focus mode workflow
+
+2. Replace magic numbers with named constants
+   - Timer duration configurable
+   - Schedule dates dynamic
+
+3. Add breadcrumb navigation on inner pages
+   - Always show current location
+   - One-click return to common pages
+
+4. Status indicator in header showing today's progress
+   - Persistent across all pages
+   - Quick glance at completion
+
+SPEED IMPROVEMENTS:
+
+1. Implement route-based code splitting
+   - React.lazy() for Statistics, Calendar, Notes pages
+   - Reduce initial bundle by 40%
+
+2. Reduce background animation complexity on mobile
+   - Detect device capability
+   - Simplify or disable animations
+
+3. Lazy load Recharts only on Statistics page
+   - Dynamic import when route accessed
+
+4. Add service worker for offline support
+   - Cache static assets
+   - Allow offline progress tracking
+
+DELIGHT ADDITIONS:
+
+1. Sound effects (optional, toggle in settings)
+   - Soft click on button press
+   - Completion chime
+   - Timer tick in final 10 seconds
+
+2. Streak milestone celebrations
+   - Special animation at 7, 14, 28 days
+   - Shareable achievement cards
+
+3. Daily motivational quotes API integration
+   - Fresh quote each day
+   - Match to study topics
+
+4. Progress visualization improvements
+   - Heatmap calendar view option
+   - Study time tracking (beyond lessons)
+
+5. Theme customization
+   - Color picker for accent color
+   - Dark/light/auto modes
+   - Reduced motion toggle
+
+NEW ANIMATIONS:
+
+1. Page transition: Crossfade between routes (200ms)
+   Reason: Smoother navigation feel
+
+2. List stagger: Delay cards 50ms each on mount
+   Reason: Perceived performance improvement
+
+3. Progress celebration: Burst animation at 50% and 100%
+   Reason: Milestone recognition
+
+4. Streak fire: Animated flame for streaks > 7
+   Reason: Visual reward for consistency
+
+5. Achievement unlock: Spotlight effect + particle burst
+   Reason: Make unlocks feel special
+
+DESIGN REFINEMENTS:
+
+1. Reduce glass opacity in light mode for readability
+2. Add consistent icon library (Lucide already imported)
+3. Standardize card padding (currently varies 4-8)
+4. Add focus rings to all interactive elements
+5. Implement proper dark mode with CSS custom properties only
+
+FUNCTIONAL ENHANCEMENTS:
+
+1. Study timer with break reminders
+   - Configurable work/break durations
+   - Notification support
+
+2. Spaced repetition integration
+   - Track lesson review dates
+   - Suggest lessons for review
+
+3. Collaborative features
+   - Share progress with study group
+   - Leaderboard (opt-in)
+
+4. Calendar export
+   - iCal format for external calendars
+   - Reminders integration
+
+5. Notes organization
+   - Folders or tags
+   - Rich text formatting
+   - Image attachments
+
+6. Progress sync
+   - Optional account system
+   - Cloud backup
+
+================================================================================
+END OF DOCUMENTATION
+================================================================================
