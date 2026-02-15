@@ -12,8 +12,8 @@ export interface ScheduleDay {
     subjects: Lesson[];
 }
 
-// START DATE - November 10, 2025
-const START_DATE = new Date('2025-11-10');
+// START DATE - February 15, 2026
+const START_DATE = new Date('2026-02-15');
 
 // STORAGE KEYS
 export const STORAGE_KEY = "study-dashboard-progress";
@@ -27,144 +27,125 @@ const generateScheduleDates = (startDate: Date = START_DATE) => {
     const schedule: ScheduleDay[] = [];
     const baseSchedule = [
         // DAY 1
-        {
-            subjects: [
-                { name: "Science", lesson: 3, topic: "Physical Properties of Water" },
-                { name: "Algebra", lesson: 1, topic: "Complex Numbers" },
-                { name: "History", lesson: 1, topic: "Ancient Civilizations" }
-            ]
-        },
+        { subjects: [
+            { name: "Nahw", lesson: 1, topic: "" },
+            { name: "Science", lesson: 1, topic: "" },
+            { name: "Trigonometry", lesson: 1, topic: "" },
+        ]},
         // DAY 2
-        {
-            subjects: [
-                { name: "Science", lesson: 4, topic: "Chemical Reactions" },
-                { name: "Arabic Reading", lesson: 2, topic: "Modern Literature" },
-                { name: "Trigonometry", lesson: 2, topic: "Sine & Cosine Functions" }
-            ]
-        },
+        { subjects: [
+            { name: "History", lesson: 1, topic: "" },
+            { name: "Nosoos", lesson: 1, topic: "" },
+            { name: "Matrices", lesson: 1, topic: "" },
+        ]},
         // DAY 3
-        {
-            subjects: [
-                { name: "Science", lesson: 5, topic: "Force & Motion" },
-                { name: "Similarity", lesson: 3, topic: "Triangle Similarity Theorems" },
-                { name: "History", lesson: 2, topic: "Medieval Period" }
-            ]
-        },
+        { subjects: [
+            { name: "Nahw", lesson: 2, topic: "" },
+            { name: "A'dab", lesson: 1, topic: "" },
+            { name: "Straight Line", lesson: 1, topic: "" },
+        ]},
         // DAY 4
-        {
-            subjects: [
-                { name: "Science", lesson: 6, topic: "Electricity & Magnetism" },
-                { name: "Arabic Balagha", lesson: 3, topic: "Rhetorical Devices" },
-                { name: "Algebra", lesson: 5, topic: "Polynomials" }
-            ]
-        },
+        { subjects: [
+            { name: "Science", lesson: 2, topic: "" },
+            { name: "Reading", lesson: 1, topic: "" },
+            { name: "Vectors", lesson: 1, topic: "" },
+        ]},
         // DAY 5
-        {
-            subjects: [
-                { name: "Science", lesson: 7, topic: "Waves & Sound" },
-                { name: "Trigonometry", lesson: 3, topic: "Tangent & Unit Circle" },
-                { name: "History", lesson: 3, topic: "Renaissance Era" }
-            ]
-        },
+        { subjects: [
+            { name: "Nahw", lesson: 3, topic: "" },
+            { name: "Trigonometry", lesson: 2, topic: "" },
+            { name: "Balagha", lesson: 1, topic: "" },
+        ]},
         // DAY 6
-        {
-            subjects: [
-                { name: "Science", lesson: 8, topic: "Light & Optics" },
-                { name: "Arabic AlA'dab", lesson: 1, topic: "Literary Periods" },
-                { name: "Similarity", lesson: 4, topic: "Applications" }
-            ]
-        },
+        { subjects: [
+            { name: "History", lesson: 2, topic: "" },
+            { name: "Nosoos", lesson: 2, topic: "" },
+            { name: "Linear Programming", lesson: 1, topic: "" },
+        ]},
         // DAY 7
-        {
-            subjects: [
-                { name: "Science", lesson: 9, topic: "Atomic Structure" },
-                { name: "Algebra", lesson: 6, topic: "Sequences & Series" },
-                { name: "History", lesson: 4, topic: "Industrial Revolution" }
-            ]
-        },
+        { subjects: [
+            { name: "Nahw", lesson: 4, topic: "" },
+            { name: "Science", lesson: 3, topic: "" },
+            { name: "Matrices", lesson: 2, topic: "" },
+        ]},
         // DAY 8
-        {
-            subjects: [
-                { name: "Science", lesson: 10, topic: "Periodic Table" },
-                { name: "Arabic Nosoos", lesson: 2, topic: "Prose Analysis" },
-                { name: "Trigonometry", lesson: 4, topic: "Trigonometric Identities" }
-            ]
-        },
+        { subjects: [
+            { name: "A'dab", lesson: 2, topic: "" },
+            { name: "Trigonometry", lesson: 3, topic: "" },
+            { name: "Straight Line", lesson: 2, topic: "" },
+        ]},
         // DAY 9
-        {
-            subjects: [
-                { name: "Science", lesson: 11, topic: "Organic Chemistry" },
-                { name: "Similarity", lesson: 5, topic: "Proof Techniques" },
-                { name: "History", lesson: 5, topic: "World Wars" }
-            ]
-        },
+        { subjects: [
+            { name: "Nahw", lesson: 5, topic: "" },
+            { name: "Nosoos", lesson: 3, topic: "" },
+            { name: "Vectors", lesson: 2, topic: "" },
+        ]},
         // DAY 10
-        {
-            subjects: [
-                { name: "Science", lesson: 12, topic: "Thermodynamics" },
-                { name: "Arabic Grammar", lesson: 3, topic: "Advanced Syntax" },
-                { name: "Trigonometry", lesson: 5, topic: "Applications & Word Problems" }
-            ]
-        },
+        { subjects: [
+            { name: "Science", lesson: 4, topic: "" },
+            { name: "History", lesson: 3, topic: "" },
+            { name: "Reading", lesson: 2, topic: "" },
+        ]},
         // DAY 11
-        {
-            subjects: [
-                { name: "History", lesson: 6, topic: "Modern Era" },
-                { name: "Arabic Reading", lesson: 3, topic: "Comparative Literature" },
-                { name: "Similarity", lesson: 6, topic: "Advanced Problems" }
-            ]
-        },
+        { subjects: [
+            { name: "Nahw", lesson: 6, topic: "" },
+            { name: "Trigonometry", lesson: 4, topic: "" },
+            { name: "Matrices", lesson: 3, topic: "" },
+        ]},
         // DAY 12
-        {
-            subjects: [
-                { name: "History", lesson: 7, topic: "Contemporary Issues" },
-                { name: "Arabic Balagha", lesson: 4, topic: "Imagery & Symbolism" },
-                { name: "Trigonometry", lesson: 6, topic: "Advanced Topics" }
-            ]
-        },
+        { subjects: [
+            { name: "Nosoos", lesson: 4, topic: "" },
+            { name: "A'dab", lesson: 3, topic: "" },
+            { name: "Balagha", lesson: 2, topic: "" },
+        ]},
         // DAY 13
-        {
-            subjects: [
-                { name: "History", lesson: 8, topic: "Future Challenges" },
-                { name: "Arabic AlA'dab", lesson: 2, topic: "Famous Authors" },
-                { name: "Similarity", lesson: 7, topic: "Review & Practice" }
-            ]
-        },
+        { subjects: [
+            { name: "Nahw", lesson: 7, topic: "" },
+            { name: "Science", lesson: 5, topic: "" },
+            { name: "Straight Line", lesson: 3, topic: "" },
+        ]},
         // DAY 14
-        {
-            subjects: [
-                { name: "History", lesson: 9, topic: "Comprehensive Review" },
-                { name: "Arabic Nosoos", lesson: 3, topic: "Historical Texts" },
-                { name: "Similarity", lesson: 8, topic: "Final Topics" }
-            ]
-        },
-        // DAY 15 - Arabic Only Phase
-        {
-            subjects: [
-                { name: "Arabic Nosoos", lesson: 4, topic: "Contemporary Poetry" },
-                { name: "Arabic Grammar", lesson: 4, topic: "Modifiers & Adjectives" }
-            ]
-        },
+        { subjects: [
+            { name: "History", lesson: 4, topic: "" },
+            { name: "Trigonometry", lesson: 5, topic: "" },
+            { name: "Linear Programming", lesson: 2, topic: "" },
+        ]},
+        // DAY 15
+        { subjects: [
+            { name: "Nahw", lesson: 8, topic: "" },
+            { name: "Nosoos", lesson: 5, topic: "" },
+            { name: "Matrices", lesson: 4, topic: "" },
+        ]},
         // DAY 16
-        {
-            subjects: [
-                { name: "Arabic Nosoos", lesson: 5, topic: "Critical Analysis" },
-                { name: "Arabic Grammar", lesson: 5, topic: "Complex Sentences" }
-            ]
-        },
+        { subjects: [
+            { name: "Science", lesson: 6, topic: "" },
+            { name: "Vectors", lesson: 3, topic: "" },
+            { name: "Reading", lesson: 3, topic: "" },
+        ]},
         // DAY 17
-        {
-            subjects: [
-                { name: "Arabic Nosoos", lesson: 6, topic: "Advanced Analysis" },
-                { name: "Arabic AlA'dab", lesson: 3, topic: "Literary Movements" }
-            ]
-        },
-        // DAY 18 - Review Day
-        {
-            subjects: [
-                { name: "Review", lesson: 1, topic: "Comprehensive Review & Practice" }
-            ]
-        },
+        { subjects: [
+            { name: "Nahw", lesson: 9, topic: "" },
+            { name: "Trigonometry", lesson: 6, topic: "" },
+            { name: "A'dab", lesson: 4, topic: "" },
+        ]},
+        // DAY 18
+        { subjects: [
+            { name: "History", lesson: 5, topic: "" },
+            { name: "Science", lesson: 7, topic: "" },
+            { name: "Straight Line", lesson: 4, topic: "" },
+        ]},
+        // DAY 19
+        { subjects: [
+            { name: "Nahw", lesson: 10, topic: "" },
+            { name: "Nosoos", lesson: 6, topic: "" },
+            { name: "Matrices", lesson: 5, topic: "" },
+        ]},
+        // DAY 20
+        { subjects: [
+            { name: "Science", lesson: 8, topic: "" },
+            { name: "History", lesson: 6, topic: "" },
+            { name: "Trigonometry", lesson: 7, topic: "" },
+        ]},
     ];
 
     baseSchedule.forEach((dayData, index) => {
@@ -185,7 +166,7 @@ export const ENHANCED_SCHEDULE: ScheduleDay[] = generateScheduleDates();
 
 // Helper function to get lesson display name
 export const getLessonDisplayName = (lesson: Lesson): string => {
-    return `${lesson.name} (${lesson.topic})`;
+    return `${lesson.name} – Lesson ${lesson.lesson}`;
 };
 
 // Helper function to check if a day is complete
