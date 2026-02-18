@@ -1,93 +1,124 @@
 import { motion } from "framer-motion";
 import FloatingParticles from "./FloatingParticles";
+import { useEffect, useState } from "react";
 
 const PremiumBackground = () => {
+  const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
+
+  useEffect(() => {
+    const handleMove = (e: MouseEvent) => {
+      setMousePos({
+        x: (e.clientX / window.innerWidth) * 100,
+        y: (e.clientY / window.innerHeight) * 100,
+      });
+    };
+    window.addEventListener("mousemove", handleMove);
+    return () => window.removeEventListener("mousemove", handleMove);
+  }, []);
+
   return (
     <>
-      {/* Warm Aurora with parallax-feel slow drift */}
-      <div className="aurora" />
-
-      {/* Castle Silhouette Overlay — very subtle */}
-      <motion.div
+      {/* Animated mesh gradient base */}
+      <div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 400'%3E%3Cpath d='M0 400V320h40v-40h20v40h60v-60h20v-30h10v30h20v60h80v-80h15v-20h10v20h15v80h100v-50h20v50h60v-100h10v-20h20v20h10v100h80v-40h30v40h60v-70h15v-25h10v25h15v70h100v-90h20v-30h10v30h20v90h80v-50h30v50h60v-60h20v60h100V400z' fill='%23000' opacity='0.06'/%3E%3C/svg%3E")`,
-          backgroundRepeat: "repeat-x",
-          backgroundPosition: "bottom center",
-          backgroundSize: "1440px 400px",
+          background: `
+            radial-gradient(ellipse 80% 60% at 20% 30%, hsl(260 60% 18% / 0.7) 0%, transparent 60%),
+            radial-gradient(ellipse 70% 50% at 80% 70%, hsl(220 50% 12% / 0.6) 0%, transparent 55%),
+            radial-gradient(ellipse 50% 40% at 60% 20%, hsl(185 40% 15% / 0.4) 0%, transparent 50%),
+            hsl(var(--background))
+          `,
         }}
-        animate={{ y: [0, -4, 0] }}
+      />
+
+      {/* Slow drifting orb 1 */}
+      <motion.div
+        className="fixed pointer-events-none z-0"
+        style={{
+          width: "700px",
+          height: "700px",
+          top: "0%",
+          left: "5%",
+          background: "radial-gradient(circle, hsl(260 70% 50% / 0.08) 0%, transparent 70%)",
+          filter: "blur(80px)",
+        }}
+        animate={{
+          x: [0, 40, -20, 0],
+          y: [0, -30, 20, 0],
+          scale: [1, 1.1, 0.95, 1],
+        }}
         transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
       />
 
-      {/* Compass / Map-like Pattern — very faint */}
-      <div
-        className="fixed inset-0 pointer-events-none z-0"
-        style={{
-          backgroundImage: `
-            radial-gradient(circle at 50% 50%, transparent 60%, hsl(38 30% 25% / 0.04) 61%, transparent 62%),
-            radial-gradient(circle at 50% 50%, transparent 38%, hsl(38 30% 25% / 0.03) 39%, transparent 40%)
-          `,
-          backgroundSize: "300px 300px",
-          backgroundPosition: "center center",
-        }}
-      />
-
-      {/* Subtle grain texture */}
-      <div
-        className="fixed inset-0 pointer-events-none z-0"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E")`,
-        }}
-      />
-
-      {/* Moving gradient shimmer — slow sweep across screen */}
-      <motion.div
-        className="fixed inset-0 pointer-events-none z-0"
-        style={{
-          background: "linear-gradient(120deg, transparent 30%, hsl(38 70% 50% / 0.03) 50%, transparent 70%)",
-          backgroundSize: "200% 100%",
-        }}
-        animate={{ backgroundPosition: ["0% 50%", "200% 50%"] }}
-        transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
-      />
-
-      {/* Warm ambient glow — top left with gentle drift */}
+      {/* Slow drifting orb 2 */}
       <motion.div
         className="fixed pointer-events-none z-0"
         style={{
           width: "600px",
           height: "600px",
-          top: "5%",
-          left: "10%",
-          background: "radial-gradient(circle, hsl(38 70% 50% / 0.04) 0%, transparent 70%)",
+          bottom: "5%",
+          right: "10%",
+          background: "radial-gradient(circle, hsl(185 60% 45% / 0.06) 0%, transparent 70%)",
           filter: "blur(80px)",
         }}
         animate={{
-          opacity: [0.5, 0.8, 0.5],
-          scale: [1, 1.05, 1],
-          x: [0, 15, 0],
+          x: [0, -30, 15, 0],
+          y: [0, 20, -25, 0],
+          scale: [1, 1.08, 0.96, 1],
         }}
-        transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+        transition={{ duration: 24, repeat: Infinity, ease: "easeInOut" }}
       />
 
-      {/* Warm ambient glow — bottom right */}
+      {/* Slow drifting orb 3 - midnight blue */}
       <motion.div
         className="fixed pointer-events-none z-0"
         style={{
           width: "500px",
           height: "500px",
-          bottom: "10%",
-          right: "15%",
-          background: "radial-gradient(circle, hsl(30 50% 35% / 0.05) 0%, transparent 70%)",
-          filter: "blur(80px)",
+          top: "40%",
+          left: "50%",
+          background: "radial-gradient(circle, hsl(230 50% 25% / 0.06) 0%, transparent 70%)",
+          filter: "blur(90px)",
         }}
         animate={{
-          opacity: [0.4, 0.7, 0.4],
-          scale: [1, 1.08, 1],
-          x: [0, -12, 0],
+          x: [0, 25, -35, 0],
+          y: [0, -15, 30, 0],
         }}
-        transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+        transition={{ duration: 28, repeat: Infinity, ease: "easeInOut" }}
+      />
+
+      {/* Cursor glow spotlight */}
+      <div
+        className="fixed pointer-events-none z-[2] transition-all duration-700 ease-out"
+        style={{
+          width: "500px",
+          height: "500px",
+          left: `${mousePos.x}%`,
+          top: `${mousePos.y}%`,
+          transform: "translate(-50%, -50%)",
+          background: "radial-gradient(circle, hsl(var(--glow-primary) / 0.04) 0%, transparent 60%)",
+          filter: "blur(40px)",
+        }}
+      />
+
+      {/* Geometric grid pattern — very subtle */}
+      <div
+        className="fixed inset-0 pointer-events-none z-0 opacity-[0.025]"
+        style={{
+          backgroundImage: `
+            linear-gradient(hsl(var(--glow-primary) / 0.3) 1px, transparent 1px),
+            linear-gradient(90deg, hsl(var(--glow-primary) / 0.3) 1px, transparent 1px)
+          `,
+          backgroundSize: "60px 60px",
+        }}
+      />
+
+      {/* Noise texture overlay */}
+      <div
+        className="fixed inset-0 pointer-events-none z-0 opacity-[0.035]"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E")`,
+        }}
       />
 
       {/* Floating particles */}
@@ -95,9 +126,9 @@ const PremiumBackground = () => {
 
       {/* Vignette */}
       <div
-        className="fixed inset-0 pointer-events-none z-10"
+        className="fixed inset-0 pointer-events-none z-[3]"
         style={{
-          background: "radial-gradient(ellipse at center, transparent 40%, hsl(30 18% 5% / 0.6) 100%)",
+          background: "radial-gradient(ellipse at center, transparent 50%, hsl(var(--background) / 0.7) 100%)",
         }}
       />
     </>
