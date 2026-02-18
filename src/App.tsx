@@ -20,57 +20,49 @@ import AITipsPage from "./pages/AITipsPage";
 import PremiumBackground from "./components/PremiumBackground";
 import AIChatBuddy from "./components/AIChatBuddy";
 import ThemeEditorPage from "./pages/ThemeEditorPage";
+import RamadanOverlay from "./components/RamadanOverlay";
+import { useRamadanMode } from "./hooks/useRamadanMode";
 
 const queryClient = new QueryClient();
+
+const AppInner = () => {
+  const { isRamadan } = useRamadanMode();
+
+  return (
+    <>
+      <Toaster />
+      <Sonner />
+      <PremiumBackground />
+      <RamadanOverlay active={isRamadan} />
+      <BrowserRouter>
+        <FloatingNav />
+        <AIChatBuddy />
+        <Routes>
+          <Route path="/" element={<TodaysLesson />} />
+          <Route path="/dashboard" element={<Index />} />
+          <Route path="/statistics" element={<Statistics />} />
+          <Route path="/weekly-summary" element={<WeeklySummary />} />
+          <Route path="/notes" element={<NotesPage />} />
+          <Route path="/achievements" element={<AchievementsPage />} />
+          <Route path="/calendar" element={<CalendarPage />} />
+          <Route path="/reminders" element={<RemindersPage />} />
+          <Route path="*" element={<NotFound />} />
+          <Route path="/resources" element={<ResourcesPage />} />
+          <Route path="/focus" element={<FocusModePage />} />
+          <Route path="/themes" element={<ThemesPage />} />
+          <Route path="/ai-tips" element={<AITipsPage />} />
+          <Route path="/theme-editor" element={<ThemeEditorPage />} />
+        </Routes>
+      </BrowserRouter>
+    </>
+  );
+};
 
 const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <PremiumBackground />
-        <BrowserRouter>
-          {/* Floating Navigation - Shows on all pages */}
-          <FloatingNav />
-          <AIChatBuddy />
-
-          <Routes>
-            {/* Today's Lesson is the default route */}
-            <Route path="/" element={<TodaysLesson />} />
-
-            {/* Dashboard route */}
-            <Route path="/dashboard" element={<Index />} />
-
-            {/* Statistics route */}
-            <Route path="/statistics" element={<Statistics />} />
-
-            {/* Weekly Summary */}
-            <Route path="/weekly-summary" element={<WeeklySummary />} />
-
-            {/* Notes Manager */}
-            <Route path="/notes" element={<NotesPage />} />
-
-            {/* Achievements */}
-            <Route path="/achievements" element={<AchievementsPage />} />
-
-            {/* Calendar */}
-            <Route path="/calendar" element={<CalendarPage />} />
-
-            {/* Reminders */}
-            <Route path="/reminders" element={<RemindersPage />} />
-
-            {/* 404 catch-all */}
-            <Route path="*" element={<NotFound />} />
-
-            <Route path="/resources" element={<ResourcesPage />} />
-            <Route path="/focus" element={<FocusModePage />} />
-            <Route path="/themes" element={<ThemesPage />} />
-            <Route path="/ai-tips" element={<AITipsPage />} />
-            <Route path="/theme-editor" element={<ThemeEditorPage />} />
-
-          </Routes>
-        </BrowserRouter>
+        <AppInner />
       </TooltipProvider>
     </QueryClientProvider>
   );
