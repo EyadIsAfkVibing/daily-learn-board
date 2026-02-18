@@ -1,13 +1,14 @@
 import { motion } from "framer-motion";
+import FloatingParticles from "./FloatingParticles";
 
 const PremiumBackground = () => {
   return (
     <>
-      {/* Warm Aurora */}
+      {/* Warm Aurora with parallax-feel slow drift */}
       <div className="aurora" />
 
       {/* Castle Silhouette Overlay — very subtle */}
-      <div
+      <motion.div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 400'%3E%3Cpath d='M0 400V320h40v-40h20v40h60v-60h20v-30h10v30h20v60h80v-80h15v-20h10v20h15v80h100v-50h20v50h60v-100h10v-20h20v20h10v100h80v-40h30v40h60v-70h15v-25h10v25h15v70h100v-90h20v-30h10v30h20v90h80v-50h30v50h60v-60h20v60h100V400z' fill='%23000' opacity='0.06'/%3E%3C/svg%3E")`,
@@ -15,6 +16,8 @@ const PremiumBackground = () => {
           backgroundPosition: "bottom center",
           backgroundSize: "1440px 400px",
         }}
+        animate={{ y: [0, -4, 0] }}
+        transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
       />
 
       {/* Compass / Map-like Pattern — very faint */}
@@ -38,7 +41,18 @@ const PremiumBackground = () => {
         }}
       />
 
-      {/* Warm ambient glow — top left */}
+      {/* Moving gradient shimmer — slow sweep across screen */}
+      <motion.div
+        className="fixed inset-0 pointer-events-none z-0"
+        style={{
+          background: "linear-gradient(120deg, transparent 30%, hsl(38 70% 50% / 0.03) 50%, transparent 70%)",
+          backgroundSize: "200% 100%",
+        }}
+        animate={{ backgroundPosition: ["0% 50%", "200% 50%"] }}
+        transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+      />
+
+      {/* Warm ambient glow — top left with gentle drift */}
       <motion.div
         className="fixed pointer-events-none z-0"
         style={{
@@ -52,12 +66,9 @@ const PremiumBackground = () => {
         animate={{
           opacity: [0.5, 0.8, 0.5],
           scale: [1, 1.05, 1],
+          x: [0, 15, 0],
         }}
-        transition={{
-          duration: 12,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
+        transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
       />
 
       {/* Warm ambient glow — bottom right */}
@@ -74,13 +85,13 @@ const PremiumBackground = () => {
         animate={{
           opacity: [0.4, 0.7, 0.4],
           scale: [1, 1.08, 1],
+          x: [0, -12, 0],
         }}
-        transition={{
-          duration: 15,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
+        transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
       />
+
+      {/* Floating particles */}
+      <FloatingParticles />
 
       {/* Vignette */}
       <div

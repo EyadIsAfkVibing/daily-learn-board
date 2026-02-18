@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { ENHANCED_SCHEDULE, STORAGE_KEY } from "@/lib/schedule";
 import StreakCounter from "@/components/StreakCounter";
+import ScrollReveal from "@/components/ScrollReveal";
+
+const antiGravity: [number, number, number, number] = [0.25, 0.46, 0.45, 0.94];
 
 const CleanDashboard = () => {
   const navigate = useNavigate();
@@ -124,9 +127,9 @@ const CleanDashboard = () => {
       <div className="max-w-7xl mx-auto px-4 py-6 md:py-8">
         {/* Header */}
         <motion.header
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+          transition={{ duration: 0.8, ease: antiGravity }}
           className="mb-8"
         >
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
@@ -154,12 +157,7 @@ const CleanDashboard = () => {
           <div className="engraved-divider" />
 
           {/* Overall Progress — Engraved Meter */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.15 }}
-            className="mb-8"
-          >
+          <ScrollReveal delay={0.1}>
             <Card className="glass-strong p-6 rounded-2xl ornament-corner">
               <div className="flex justify-between items-center mb-3">
                 <span className="text-lg font-serif font-semibold text-foreground">
@@ -184,40 +182,45 @@ const CleanDashboard = () => {
                   }}
                   initial={{ width: 0 }}
                   animate={{ width: `${progressPercent}%` }}
-                  transition={{ duration: 1.2, ease: [0.4, 0, 0.2, 1] }}
+                  transition={{ duration: 1.4, ease: antiGravity, delay: 0.3 }}
                 />
               </div>
             </Card>
-          </motion.div>
+          </ScrollReveal>
         </motion.header>
 
         {/* Quick Actions Grid */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="mb-8"
-        >
+        <ScrollReveal delay={0.05}>
           <h2 className="text-2xl font-serif font-semibold text-primary mb-4">
             Quick Actions
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {quickActions.map((action, idx) => (
+        </ScrollReveal>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+          {quickActions.map((action, idx) => (
+            <ScrollReveal key={action.path + action.label} delay={idx * 0.06} direction={idx % 2 === 0 ? "up" : "left"}>
               <motion.div
-                key={action.path + action.label}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.06, duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
                 whileHover={{
-                  y: -4,
-                  transition: { duration: 0.25 },
+                  y: -6,
+                  scale: 1.03,
+                  boxShadow: "0 12px 32px hsl(38 70% 50% / 0.15)",
+                  transition: { duration: 0.35, ease: antiGravity },
                 }}
-                whileTap={{ scale: 0.97 }}
+                whileTap={{ scale: 0.96 }}
               >
                 <Card
                   onClick={() => navigate(action.path)}
-                  className="glass ornament-corner p-5 cursor-pointer text-center rounded-2xl transition-all duration-300 hover:shadow-[0_8px_24px_hsl(38_70%_50%/0.12)] group"
+                  className="glass ornament-corner p-5 cursor-pointer text-center rounded-2xl transition-all duration-300 group relative overflow-hidden"
                 >
+                  {/* Ambient highlight sweep on hover */}
+                  <motion.div
+                    className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    style={{
+                      background: "linear-gradient(120deg, transparent 20%, hsl(38 70% 50% / 0.06) 50%, transparent 80%)",
+                      backgroundSize: "200% 100%",
+                    }}
+                    animate={{ backgroundPosition: ["0% 50%", "200% 50%"] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                  />
                   <div className="text-primary mb-3 flex justify-center opacity-70 group-hover:opacity-100 transition-opacity duration-300">
                     {action.icon}
                   </div>
@@ -226,48 +229,44 @@ const CleanDashboard = () => {
                   </div>
                 </Card>
               </motion.div>
-            ))}
-          </div>
-        </motion.div>
+            </ScrollReveal>
+          ))}
+        </div>
 
         {/* Engraved Divider */}
         <div className="engraved-divider" />
 
         {/* Streak Counter */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="mb-8"
-        >
-          <StreakCounter progress={progress} />
-        </motion.div>
+        <ScrollReveal delay={0.1}>
+          <div className="mb-8">
+            <StreakCounter progress={progress} />
+          </div>
+        </ScrollReveal>
 
         {/* Subject Progress Overview */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-        >
+        <ScrollReveal delay={0.05}>
           <h2 className="text-2xl font-serif font-semibold text-primary mb-4">
             Subject Progress
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {uniqueSubjects.map((subject, idx) => {
-              const { completed, total } = subjectProgress[subject];
-              const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
-              return (
+        </ScrollReveal>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {uniqueSubjects.map((subject, idx) => {
+            const { completed, total } = subjectProgress[subject];
+            const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+            return (
+              <ScrollReveal key={subject} delay={0.04 * idx} direction={idx % 3 === 0 ? "up" : idx % 3 === 1 ? "left" : "right"}>
                 <motion.div
-                  key={subject}
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: 0.05 * idx, ease: [0.4, 0, 0.2, 1] }}
                   whileHover={{
-                    y: -3,
-                    transition: { duration: 0.25 },
+                    y: -5,
+                    scale: 1.02,
+                    boxShadow: "0 10px 28px hsl(38 70% 50% / 0.12)",
+                    transition: { duration: 0.35, ease: antiGravity },
                   }}
+                  whileTap={{ scale: 0.98 }}
                 >
-                  <Card className="glass ornament-corner p-4 rounded-2xl transition-all duration-300 hover:shadow-[0_8px_24px_hsl(38_70%_50%/0.1)]">
+                  <Card className="glass ornament-corner p-4 rounded-2xl relative overflow-hidden group">
+                    {/* Shimmer sweep on hover */}
+                    <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500 shine" />
                     <div className="text-sm font-semibold text-muted-foreground mb-2 truncate" title={subject}>
                       {subject}
                     </div>
@@ -289,34 +288,29 @@ const CleanDashboard = () => {
                         }}
                         initial={{ width: 0 }}
                         animate={{ width: `${percent}%` }}
-                        transition={{ duration: 0.7, delay: 0.1 * idx, ease: [0.4, 0, 0.2, 1] }}
+                        transition={{ duration: 1, delay: 0.15 * idx, ease: antiGravity }}
                       />
                     </div>
                     <div className="text-xs text-primary font-semibold mt-1">{percent}%</div>
                   </Card>
                 </motion.div>
-              );
-            })}
-          </div>
-        </motion.div>
+              </ScrollReveal>
+            );
+          })}
+        </div>
 
         {/* Engraved Divider */}
         <div className="engraved-divider mt-8" />
 
         {/* Motivational Quote */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.5 }}
-          className="mt-6"
-        >
-          <Card className="glass-strong ornament-corner p-8 text-center rounded-2xl">
+        <ScrollReveal delay={0.2} direction="up">
+          <Card className="glass-strong ornament-corner p-8 text-center rounded-2xl mt-6">
             <p className="text-xl font-serif font-semibold text-primary mb-2">
               "The expert in anything was once a beginner."
             </p>
             <p className="text-sm text-muted-foreground">Keep pushing forward</p>
           </Card>
-        </motion.div>
+        </ScrollReveal>
       </div>
     </div>
   );

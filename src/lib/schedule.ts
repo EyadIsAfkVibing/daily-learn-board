@@ -12,8 +12,8 @@ export interface ScheduleDay {
     subjects: Lesson[];
 }
 
-// START DATE - February 15, 2026
-const START_DATE = new Date('2026-02-15');
+// START DATE - February 18, 2026 (lessons begin)
+const START_DATE = new Date('2026-02-18');
 
 // STORAGE KEYS
 export const STORAGE_KEY = "study-dashboard-progress";
@@ -22,142 +22,122 @@ export const TIMER_STORAGE_KEY = "study-dashboard-timer";
 export const SCHEDULES_STORAGE_KEY = "study-dashboard-schedules";
 export const ACTIVE_SCHEDULE_KEY = "study-dashboard-active-schedule";
 
-// Function to generate dates dynamically
+// All lessons to distribute — 2 per day, balanced across subjects
+const ALL_LESSONS: Lesson[] = [
+    // Distribute evenly: interleave subjects for variety
+    // Day 1
+    { name: "Nahw", lesson: 1, topic: "" },
+    { name: "Trigonometry", lesson: 1, topic: "" },
+    // Day 2
+    { name: "Science", lesson: 1, topic: "" },
+    { name: "History", lesson: 1, topic: "" },
+    // Day 3
+    { name: "Nosoos", lesson: 1, topic: "" },
+    { name: "Matrices", lesson: 1, topic: "" },
+    // Day 4
+    { name: "Nahw", lesson: 2, topic: "" },
+    { name: "A'dab", lesson: 1, topic: "" },
+    // Day 5
+    { name: "Straight Line", lesson: 1, topic: "" },
+    { name: "Science", lesson: 2, topic: "" },
+    // Day 6
+    { name: "Trigonometry", lesson: 2, topic: "" },
+    { name: "Vectors", lesson: 1, topic: "" },
+    // Day 7
+    { name: "Nahw", lesson: 3, topic: "" },
+    { name: "Reading", lesson: 1, topic: "" },
+    // Day 8
+    { name: "History", lesson: 2, topic: "" },
+    { name: "Nosoos", lesson: 2, topic: "" },
+    // Day 9
+    { name: "Balagha", lesson: 1, topic: "" },
+    { name: "Matrices", lesson: 2, topic: "" },
+    // Day 10
+    { name: "Science", lesson: 3, topic: "" },
+    { name: "Nahw", lesson: 4, topic: "" },
+    // Day 11
+    { name: "Trigonometry", lesson: 3, topic: "" },
+    { name: "Linear Programming", lesson: 1, topic: "" },
+    // Day 12
+    { name: "A'dab", lesson: 2, topic: "" },
+    { name: "Nosoos", lesson: 3, topic: "" },
+    // Day 13
+    { name: "Straight Line", lesson: 2, topic: "" },
+    { name: "Nahw", lesson: 5, topic: "" },
+    // Day 14
+    { name: "Science", lesson: 4, topic: "" },
+    { name: "History", lesson: 3, topic: "" },
+    // Day 15
+    { name: "Trigonometry", lesson: 4, topic: "" },
+    { name: "Reading", lesson: 2, topic: "" },
+    // Day 16
+    { name: "Matrices", lesson: 3, topic: "" },
+    { name: "Nahw", lesson: 6, topic: "" },
+    // Day 17
+    { name: "Vectors", lesson: 2, topic: "" },
+    { name: "Nosoos", lesson: 4, topic: "" },
+    // Day 18
+    { name: "Science", lesson: 5, topic: "" },
+    { name: "A'dab", lesson: 3, topic: "" },
+    // Day 19
+    { name: "Trigonometry", lesson: 5, topic: "" },
+    { name: "Nahw", lesson: 7, topic: "" },
+    // Day 20
+    { name: "History", lesson: 4, topic: "" },
+    { name: "Straight Line", lesson: 3, topic: "" },
+    // Day 21
+    { name: "Nosoos", lesson: 5, topic: "" },
+    { name: "Matrices", lesson: 4, topic: "" },
+    // Day 22
+    { name: "Science", lesson: 6, topic: "" },
+    { name: "Nahw", lesson: 8, topic: "" },
+    // Day 23
+    { name: "Trigonometry", lesson: 6, topic: "" },
+    { name: "Balagha", lesson: 2, topic: "" },
+    // Day 24
+    { name: "Reading", lesson: 3, topic: "" },
+    { name: "History", lesson: 5, topic: "" },
+    // Day 25
+    { name: "A'dab", lesson: 4, topic: "" },
+    { name: "Nahw", lesson: 9, topic: "" },
+    // Day 26
+    { name: "Vectors", lesson: 3, topic: "" },
+    { name: "Science", lesson: 7, topic: "" },
+    // Day 27
+    { name: "Nosoos", lesson: 6, topic: "" },
+    { name: "Matrices", lesson: 5, topic: "" },
+    // Day 28
+    { name: "Trigonometry", lesson: 7, topic: "" },
+    { name: "Nahw", lesson: 10, topic: "" },
+    // Day 29
+    { name: "Straight Line", lesson: 4, topic: "" },
+    { name: "Linear Programming", lesson: 2, topic: "" },
+    // Day 30
+    { name: "Science", lesson: 8, topic: "" },
+    { name: "History", lesson: 6, topic: "" },
+];
+
+// Function to generate dates dynamically — 2 lessons per day
 const generateScheduleDates = (startDate: Date = START_DATE) => {
     const schedule: ScheduleDay[] = [];
-    const baseSchedule = [
-        // DAY 1
-        { subjects: [
-            { name: "Nahw", lesson: 1, topic: "" },
-            { name: "Science", lesson: 1, topic: "" },
-            { name: "Trigonometry", lesson: 1, topic: "" },
-        ]},
-        // DAY 2
-        { subjects: [
-            { name: "History", lesson: 1, topic: "" },
-            { name: "Nosoos", lesson: 1, topic: "" },
-            { name: "Matrices", lesson: 1, topic: "" },
-        ]},
-        // DAY 3
-        { subjects: [
-            { name: "Nahw", lesson: 2, topic: "" },
-            { name: "A'dab", lesson: 1, topic: "" },
-            { name: "Straight Line", lesson: 1, topic: "" },
-        ]},
-        // DAY 4
-        { subjects: [
-            { name: "Science", lesson: 2, topic: "" },
-            { name: "Reading", lesson: 1, topic: "" },
-            { name: "Vectors", lesson: 1, topic: "" },
-        ]},
-        // DAY 5
-        { subjects: [
-            { name: "Nahw", lesson: 3, topic: "" },
-            { name: "Trigonometry", lesson: 2, topic: "" },
-            { name: "Balagha", lesson: 1, topic: "" },
-        ]},
-        // DAY 6
-        { subjects: [
-            { name: "History", lesson: 2, topic: "" },
-            { name: "Nosoos", lesson: 2, topic: "" },
-            { name: "Linear Programming", lesson: 1, topic: "" },
-        ]},
-        // DAY 7
-        { subjects: [
-            { name: "Nahw", lesson: 4, topic: "" },
-            { name: "Science", lesson: 3, topic: "" },
-            { name: "Matrices", lesson: 2, topic: "" },
-        ]},
-        // DAY 8
-        { subjects: [
-            { name: "A'dab", lesson: 2, topic: "" },
-            { name: "Trigonometry", lesson: 3, topic: "" },
-            { name: "Straight Line", lesson: 2, topic: "" },
-        ]},
-        // DAY 9
-        { subjects: [
-            { name: "Nahw", lesson: 5, topic: "" },
-            { name: "Nosoos", lesson: 3, topic: "" },
-            { name: "Vectors", lesson: 2, topic: "" },
-        ]},
-        // DAY 10
-        { subjects: [
-            { name: "Science", lesson: 4, topic: "" },
-            { name: "History", lesson: 3, topic: "" },
-            { name: "Reading", lesson: 2, topic: "" },
-        ]},
-        // DAY 11
-        { subjects: [
-            { name: "Nahw", lesson: 6, topic: "" },
-            { name: "Trigonometry", lesson: 4, topic: "" },
-            { name: "Matrices", lesson: 3, topic: "" },
-        ]},
-        // DAY 12
-        { subjects: [
-            { name: "Nosoos", lesson: 4, topic: "" },
-            { name: "A'dab", lesson: 3, topic: "" },
-            { name: "Balagha", lesson: 2, topic: "" },
-        ]},
-        // DAY 13
-        { subjects: [
-            { name: "Nahw", lesson: 7, topic: "" },
-            { name: "Science", lesson: 5, topic: "" },
-            { name: "Straight Line", lesson: 3, topic: "" },
-        ]},
-        // DAY 14
-        { subjects: [
-            { name: "History", lesson: 4, topic: "" },
-            { name: "Trigonometry", lesson: 5, topic: "" },
-            { name: "Linear Programming", lesson: 2, topic: "" },
-        ]},
-        // DAY 15
-        { subjects: [
-            { name: "Nahw", lesson: 8, topic: "" },
-            { name: "Nosoos", lesson: 5, topic: "" },
-            { name: "Matrices", lesson: 4, topic: "" },
-        ]},
-        // DAY 16
-        { subjects: [
-            { name: "Science", lesson: 6, topic: "" },
-            { name: "Vectors", lesson: 3, topic: "" },
-            { name: "Reading", lesson: 3, topic: "" },
-        ]},
-        // DAY 17
-        { subjects: [
-            { name: "Nahw", lesson: 9, topic: "" },
-            { name: "Trigonometry", lesson: 6, topic: "" },
-            { name: "A'dab", lesson: 4, topic: "" },
-        ]},
-        // DAY 18
-        { subjects: [
-            { name: "History", lesson: 5, topic: "" },
-            { name: "Science", lesson: 7, topic: "" },
-            { name: "Straight Line", lesson: 4, topic: "" },
-        ]},
-        // DAY 19
-        { subjects: [
-            { name: "Nahw", lesson: 10, topic: "" },
-            { name: "Nosoos", lesson: 6, topic: "" },
-            { name: "Matrices", lesson: 5, topic: "" },
-        ]},
-        // DAY 20
-        { subjects: [
-            { name: "Science", lesson: 8, topic: "" },
-            { name: "History", lesson: 6, topic: "" },
-            { name: "Trigonometry", lesson: 7, topic: "" },
-        ]},
-    ];
+    const lessonsPerDay = 2;
+    const totalDays = Math.ceil(ALL_LESSONS.length / lessonsPerDay);
 
-    baseSchedule.forEach((dayData, index) => {
+    for (let dayIdx = 0; dayIdx < totalDays; dayIdx++) {
         const date = new Date(startDate);
-        date.setDate(startDate.getDate() + index);
+        date.setDate(startDate.getDate() + dayIdx);
+
+        const dayLessons = ALL_LESSONS.slice(
+            dayIdx * lessonsPerDay,
+            dayIdx * lessonsPerDay + lessonsPerDay
+        );
 
         schedule.push({
-            day: index + 1,
+            day: dayIdx + 1,
             date: date.toISOString().split('T')[0],
-            subjects: dayData.subjects
+            subjects: dayLessons,
         });
-    });
+    }
 
     return schedule;
 };
