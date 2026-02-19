@@ -21,6 +21,7 @@ import PremiumBackground from "./components/PremiumBackground";
 import AIChatBuddy from "./components/AIChatBuddy";
 import ThemeEditorPage from "./pages/ThemeEditorPage";
 import RamadanOverlay from "./components/RamadanOverlay";
+import CursorSystem from "./components/CursorSystem";
 import { useRamadanMode } from "./hooks/useRamadanMode";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const AppInner = () => {
       <Sonner />
       <PremiumBackground />
       <RamadanOverlay active={isRamadan} />
+      <CursorSystem />
       <BrowserRouter>
         <FloatingNav />
         <AIChatBuddy />

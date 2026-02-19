@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { ENHANCED_SCHEDULE, STORAGE_KEY } from "@/lib/schedule";
 import StreakCounter from "@/components/StreakCounter";
 import ScrollReveal from "@/components/ScrollReveal";
+import RadialProgress from "@/components/RadialProgress";
 import { useRamadanMode } from "@/hooks/useRamadanMode";
 
 const ease: [number, number, number, number] = [0.25, 0.46, 0.45, 0.94];
@@ -206,54 +207,37 @@ const CleanDashboard = () => {
 
         <div className="engraved-divider" />
 
-        {/* Subject Progress */}
+        {/* Subject Progress — Radial Rings */}
         <ScrollReveal delay={0.05}>
           <h2 className="text-xl font-bold text-foreground mb-4">Subject Progress</h2>
         </ScrollReveal>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-          {uniqueSubjects.map((subject, idx) => {
-            const { completed, total } = subjectProgress[subject];
-            const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
-            return (
-              <ScrollReveal key={subject} delay={0.03 * idx} direction="up">
-                <motion.div
-                  whileHover={{
-                    y: -4,
-                    scale: 1.02,
-                    transition: { duration: 0.3, ease },
-                  }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <Card className="glass p-4 rounded-2xl relative overflow-hidden group">
-                    <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500 shine" />
-                    <p className="text-sm font-medium text-muted-foreground mb-1 truncate" title={subject}>
-                      {subject}
-                    </p>
-                    <p className="text-2xl font-bold text-foreground mb-2">
-                      {completed}<span className="text-muted-foreground text-base font-normal">/{total}</span>
-                    </p>
-                    {/* Mini progress */}
-                    <div
-                      className="w-full rounded-full h-1.5 overflow-hidden"
-                      style={{ background: "hsl(var(--muted))" }}
-                    >
-                      <motion.div
-                        className="h-full rounded-full"
-                        style={{
-                          background: "linear-gradient(90deg, hsl(var(--primary)), hsl(var(--accent)))",
-                        }}
-                        initial={{ width: 0 }}
-                        animate={{ width: `${percent}%` }}
-                        transition={{ duration: 1, delay: 0.1 * idx, ease }}
-                      />
-                    </div>
-                    <p className="text-xs font-semibold text-primary mt-1">{percent}%</p>
-                  </Card>
-                </motion.div>
-              </ScrollReveal>
-            );
-          })}
-        </div>
+        <ScrollReveal delay={0.1}>
+          <Card className="glass-strong p-6 rounded-3xl">
+            <div className="flex flex-wrap gap-5 justify-center md:justify-start">
+              {uniqueSubjects.map((subject, idx) => {
+                const { completed, total } = subjectProgress[subject];
+                const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+                return (
+                  <motion.div
+                    key={subject}
+                    whileHover={{ scale: 1.1, y: -4 }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                    data-interactive
+                  >
+                    <RadialProgress
+                      percent={percent}
+                      size={64}
+                      strokeWidth={5}
+                      label={subject}
+                      delay={0.08 * idx}
+                    />
+                  </motion.div>
+                );
+              })}
+            </div>
+          </Card>
+        </ScrollReveal>
 
         <div className="engraved-divider mt-8" />
 
