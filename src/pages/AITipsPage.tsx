@@ -2,7 +2,8 @@ import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ENHANCED_SCHEDULE, STORAGE_KEY, isDayComplete } from "@/lib/schedule";
+import { isDayComplete } from "@/lib/schedule";
+import { useProfile } from "@/hooks/useProfileContext";
 
 interface Tip {
     id: string;
@@ -14,19 +15,10 @@ interface Tip {
 }
 
 const AIStudyTips = () => {
-    const [progress, setProgress] = useState<{ [key: string]: boolean }>({});
+    const { profile } = useProfile();
     const [dismissedTips, setDismissedTips] = useState<string[]>([]);
 
     useEffect(() => {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-            try {
-                setProgress(JSON.parse(saved));
-            } catch (e) {
-                console.error("Failed to parse progress", e);
-            }
-        }
-
         const dismissedStr = localStorage.getItem("dismissed-tips");
         if (dismissedStr) {
             try {
@@ -45,31 +37,38 @@ const AIStudyTips = () => {
         let tempStreak = 0;
         const subjectStats: { [key: string]: { completed: number; total: number } } = {};
 
-        const today = new Date().toISOString().split("T")[0];
-        const todayIndex = ENHANCED_SCHEDULE.findIndex((day) => day.date === today);
-        const endIndex = todayIndex >= 0 ? todayIndex + 1 : ENHANCED_SCHEDULE.length;
+        if (!profile) {
+            return {
+                totalCompleted, totalLessons, daysCompleted, currentStreak,
+                completionRate: 0, subjectStats, todayIndex: -1
+            };
+        }
 
-        ENHANCED_SCHEDULE.forEach((day, dayIdx) => {
+        const today = new Date().toISOString().split("T")[0];
+        const todayIndex = profile.schedule.findIndex((day) => day.date === today);
+        const endIndex = todayIndex >= 0 ? todayIndex + 1 : profile.schedule.length;
+
+        profile.schedule.forEach((day, dayIdx) => {
             let dayComplete = true;
 
             day.subjects.forEach((subject, subIdx) => {
                 totalLessons++;
 
-                if (!subjectStats[subject.name]) {
-                    subjectStats[subject.name] = { completed: 0, total: 0 };
+                if (!subjectStats[subject.subjectName]) {
+                    subjectStats[subject.subjectName] = { completed: 0, total: 0 };
                 }
-                subjectStats[subject.name].total++;
+                subjectStats[subject.subjectName].total++;
 
-                if (progress[`${dayIdx}-${subIdx}`]) {
+                if (profile.progress[`${dayIdx}-${subIdx}`]) {
                     totalCompleted++;
-                    subjectStats[subject.name].completed++;
+                    subjectStats[subject.subjectName].completed++;
                 } else if (dayIdx < endIndex) {
                     dayComplete = false;
                 }
             });
 
             if (dayIdx < endIndex) {
-                if (dayComplete) {
+                if (dayComplete && day.subjects.length > 0) {
                     tempStreak++;
                     daysCompleted++;
                 } else {
@@ -80,7 +79,7 @@ const AIStudyTips = () => {
 
         // Calculate current streak
         for (let i = endIndex - 1; i >= 0; i--) {
-            if (isDayComplete(i, ENHANCED_SCHEDULE[i].subjects.length, progress)) {
+            if (isDayComplete(i, profile.schedule[i].subjects.length, profile.progress)) {
                 currentStreak++;
             } else {
                 break;
@@ -96,7 +95,7 @@ const AIStudyTips = () => {
             subjectStats,
             todayIndex,
         };
-    }, [progress]);
+    }, [profile]);
 
     const generateTips = (): Tip[] => {
         const tips: Tip[] = [];

@@ -4,27 +4,17 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ENHANCED_SCHEDULE, NOTES_STORAGE_KEY, getLessonDisplayName } from "@/lib/schedule";
+import { getLessonDisplayName } from "@/lib/schedule";
+import { useProfile } from "@/hooks/useProfileContext";
 
 interface NotesViewerProps {
     onClose?: () => void;
 }
 
 const NotesViewer = ({ onClose }: NotesViewerProps) => {
-    const [notes, setNotes] = useState<{ [key: string]: string }>({});
+    const { profile, updateNote } = useProfile();
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedNote, setSelectedNote] = useState<{ key: string; note: string; lesson: any } | null>(null);
-
-    useEffect(() => {
-        const savedNotes = localStorage.getItem(NOTES_STORAGE_KEY);
-        if (savedNotes) {
-            try {
-                setNotes(JSON.parse(savedNotes));
-            } catch (e) {
-                console.error("Failed to parse notes", e);
-            }
-        }
-    }, []);
 
     const notesWithLessons = useMemo(() => {
         const result: Array<{
@@ -36,11 +26,13 @@ const NotesViewer = ({ onClose }: NotesViewerProps) => {
             date: string;
         }> = [];
 
-        Object.entries(notes).forEach(([key, note]) => {
+        if (!profile) return result;
+
+        Object.entries(profile.notes).forEach(([key, note]) => {
             if (!note || note.trim() === "") return;
 
             const [dayIdx, subIdx] = key.split("-").map(Number);
-            const day = ENHANCED_SCHEDULE[dayIdx];
+            const day = profile.schedule[dayIdx];
             if (!day) return;
 
             const lesson = day.subjects[subIdx];
@@ -57,30 +49,25 @@ const NotesViewer = ({ onClose }: NotesViewerProps) => {
         });
 
         return result;
-    }, [notes]);
+    }, [profile]);
 
     const filteredNotes = useMemo(() => {
         if (!searchQuery) return notesWithLessons;
 
         const query = searchQuery.toLowerCase();
         return notesWithLessons.filter(item => {
-            const lessonName = getLessonDisplayName(item.lesson).toLowerCase();
+            const lessonName = getLessonDisplayName({ name: item.lesson.subjectName, lesson: item.lesson.lessonNumber, topic: item.lesson.topic } as any).toLowerCase();
             const noteContent = item.note.toLowerCase();
             return lessonName.includes(query) || noteContent.includes(query);
         });
     }, [notesWithLessons, searchQuery]);
 
     const handleSaveNote = (key: string, newNote: string) => {
-        const updatedNotes = { ...notes, [key]: newNote };
-        setNotes(updatedNotes);
-        localStorage.setItem(NOTES_STORAGE_KEY, JSON.stringify(updatedNotes));
+        updateNote(key, newNote);
     };
 
     const handleDeleteNote = (key: string) => {
-        const updatedNotes = { ...notes };
-        delete updatedNotes[key];
-        setNotes(updatedNotes);
-        localStorage.setItem(NOTES_STORAGE_KEY, JSON.stringify(updatedNotes));
+        updateNote(key, "");
         setSelectedNote(null);
     };
 
@@ -93,7 +80,7 @@ const NotesViewer = ({ onClose }: NotesViewerProps) => {
                 day: "numeric",
                 year: "numeric"
             });
-            markdown += `## ${getLessonDisplayName(item.lesson)}\n`;
+            markdown += `## ${getLessonDisplayName({ name: item.lesson.subjectName, lesson: item.lesson.lessonNumber, topic: item.lesson.topic } as any)}\n`;
             markdown += `**Date:** ${date} | **Day:** ${item.dayIndex + 1}\n\n`;
             markdown += `${item.note}\n\n`;
             markdown += `---\n\n`;
@@ -182,7 +169,7 @@ const NotesViewer = ({ onClose }: NotesViewerProps) => {
                                 <div className="mb-3">
                                     <div className="flex items-start justify-between mb-2">
                                         <h3 className="font-bold text-primary text-sm">
-                                            {getLessonDisplayName(item.lesson)}
+                                            {getLessonDisplayName({ name: item.lesson.subjectName, lesson: item.lesson.lessonNumber, topic: item.lesson.topic } as any)}
                                         </h3>
                                         <span className="text-xs text-muted-foreground">
                                             Day {item.dayIndex + 1}
@@ -204,7 +191,7 @@ const NotesViewer = ({ onClose }: NotesViewerProps) => {
                                 {/* Tags/Icons */}
                                 <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/30">
                                     <span className="text-xs px-2 py-1 rounded-full bg-accent/20 text-accent font-semibold">
-                                        {item.lesson.name}
+                                        {item.lesson.subjectName}
                                     </span>
                                     <span className="text-xs text-muted-foreground">
                                         {item.note.length} characters
@@ -238,10 +225,10 @@ const NotesViewer = ({ onClose }: NotesViewerProps) => {
                                 <div className="flex items-start justify-between mb-4">
                                     <div>
                                         <h3 className="text-2xl font-bold text-primary mb-1">
-                                            {getLessonDisplayName(selectedNote.lesson)}
+                                            {getLessonDisplayName({ name: selectedNote.lesson.subjectName, lesson: selectedNote.lesson.lessonNumber, topic: selectedNote.lesson.topic } as any)}
                                         </h3>
                                         <p className="text-sm text-muted-foreground">
-                                            Lesson {selectedNote.lesson.lesson}
+                                            Lesson {selectedNote.lesson.lessonNumber}
                                         </p>
                                     </div>
                                     <Button

@@ -5,48 +5,44 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from "recharts";
 
-import { ENHANCED_SCHEDULE, STORAGE_KEY, NOTES_STORAGE_KEY, getLessonDisplayName } from "@/lib/schedule";
+import { getLessonDisplayName } from "@/lib/schedule";
+import { useProfile } from "@/hooks/useProfileContext";
 
 
 const COLORS = ['#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#6366f1', '#14b8a6'];
 
 const Statistics = () => {
     const navigate = useNavigate();
-    const [progress, setProgress] = useState<{ [key: string]: boolean }>({});
+    const { profile } = useProfile();
 
     useEffect(() => {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-            try {
-                setProgress(JSON.parse(saved));
-            } catch (e) {
-                console.error("Failed to parse saved progress", e);
-            }
-        }
-    }, []);
+        if (!profile) navigate("/");
+    }, [profile, navigate]);
 
     const stats = useMemo(() => {
+        if (!profile) return { subjectStats: {}, dailyProgress: [], totalCompleted: 0, totalLessons: 0 };
+
         const subjectStats: { [key: string]: { completed: number; total: number } } = {};
         const dailyProgress: { date: string; completed: number; total: number }[] = [];
 
         let totalCompleted = 0;
         let totalLessons = 0;
 
-        ENHANCED_SCHEDULE.forEach((day, dayIdx) => {
+        profile.schedule.forEach((day, dayIdx) => {
             let dayCompleted = 0;
 
             day.subjects.forEach((subject, subIdx) => {
                 totalLessons++;
 
-                if (!subjectStats[subject.name]) {
-                    subjectStats[subject.name] = { completed: 0, total: 0 };
+                if (!subjectStats[subject.subjectName]) {
+                    subjectStats[subject.subjectName] = { completed: 0, total: 0 };
                 }
-                subjectStats[subject.name].total++;
+                subjectStats[subject.subjectName].total++;
 
-                if (progress[`${dayIdx}-${subIdx}`]) {
+                if (profile.progress[`${dayIdx}-${subIdx}`]) {
                     totalCompleted++;
                     dayCompleted++;
-                    subjectStats[subject.name].completed++;
+                    subjectStats[subject.subjectName].completed++;
                 }
             });
 
@@ -58,7 +54,7 @@ const Statistics = () => {
         });
 
         return { subjectStats, dailyProgress, totalCompleted, totalLessons };
-    }, [progress]);
+    }, [profile]);
 
     const subjectChartData = Object.entries(stats.subjectStats).map(([name, data]) => ({
         name,

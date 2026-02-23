@@ -5,7 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import confetti from "canvas-confetti";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { ENHANCED_SCHEDULE, STORAGE_KEY, isDayComplete } from "@/lib/schedule";
+import { isDayComplete } from "@/lib/schedule";
+import { useProfile } from "@/hooks/useProfileContext";
 
 interface Achievement {
     id: string;
@@ -42,11 +43,8 @@ const ACHIEVEMENTS_CONFIG = [
 
 const ACHIEVEMENTS_KEY = "study-achievements";
 
-interface RewardsSystemProps {
-    progress: { [key: string]: boolean };
-}
-
-const RewardsSystem = ({ progress }: RewardsSystemProps) => {
+const RewardsSystem = () => {
+    const { profile } = useProfile();
     const [achievements, setAchievements] = useState<Achievement[]>([]);
     const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
     const [totalPoints, setTotalPoints] = useState(0);
@@ -54,7 +52,7 @@ const RewardsSystem = ({ progress }: RewardsSystemProps) => {
 
     useEffect(() => {
         calculateAchievements();
-    }, [progress]);
+    }, [profile]);
 
     const calculateStats = () => {
         let totalCompleted = 0;
@@ -62,15 +60,17 @@ const RewardsSystem = ({ progress }: RewardsSystemProps) => {
         let currentStreak = 0;
         let tempStreak = 0;
 
+        if (!profile) return { totalCompleted, daysCompleted, currentStreak };
+
         const today = new Date().toISOString().split("T")[0];
-        const todayIndex = ENHANCED_SCHEDULE.findIndex((day) => day.date === today);
-        const endIndex = todayIndex >= 0 ? todayIndex + 1 : ENHANCED_SCHEDULE.length;
+        const todayIndex = profile.schedule.findIndex((day) => day.date === today);
+        const endIndex = todayIndex >= 0 ? todayIndex + 1 : profile.schedule.length;
 
         for (let i = 0; i < endIndex; i++) {
-            const day = ENHANCED_SCHEDULE[i];
-            const dayComplete = isDayComplete(i, day.subjects.length, progress);
+            const day = profile.schedule[i];
+            const dayComplete = isDayComplete(i, day.subjects.length, profile.progress);
 
-            if (dayComplete) {
+            if (dayComplete && day.subjects.length > 0) {
                 tempStreak++;
                 daysCompleted++;
             } else {
@@ -78,13 +78,13 @@ const RewardsSystem = ({ progress }: RewardsSystemProps) => {
             }
 
             for (let j = 0; j < day.subjects.length; j++) {
-                if (progress[`${i}-${j}`]) totalCompleted++;
+                if (profile.progress[`${i}-${j}`]) totalCompleted++;
             }
         }
 
         for (let i = endIndex - 1; i >= 0; i--) {
-            const day = ENHANCED_SCHEDULE[i];
-            if (isDayComplete(i, day.subjects.length, progress)) {
+            const day = profile.schedule[i];
+            if (isDayComplete(i, day.subjects.length, profile.progress)) {
                 currentStreak++;
             } else {
                 break;

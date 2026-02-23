@@ -4,8 +4,8 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ENHANCED_SCHEDULE, NOTES_STORAGE_KEY, STORAGE_KEY } from "@/lib/schedule";
 import { toast } from "sonner";
+import { useProfile } from "@/hooks/useProfileContext";
 
 const LESSON_NAMES_KEY = "custom-lesson-names";
 
@@ -21,25 +21,14 @@ interface LessonNote {
 }
 
 const LessonManager = () => {
-    const [notes, setNotes] = useState<{ [key: string]: string }>({});
+    const { profile, updateNote } = useProfile();
     const [customNames, setCustomNames] = useState<{ [key: string]: string }>({});
-    const [progress, setProgress] = useState<{ [key: string]: boolean }>({});
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedLesson, setSelectedLesson] = useState<LessonNote | null>(null);
     const [isEditingName, setIsEditingName] = useState(false);
     const [tempName, setTempName] = useState("");
 
     useEffect(() => {
-        // Load notes
-        const savedNotes = localStorage.getItem(NOTES_STORAGE_KEY);
-        if (savedNotes) {
-            try {
-                setNotes(JSON.parse(savedNotes));
-            } catch (e) {
-                console.error("Failed to parse notes", e);
-            }
-        }
-
         // Load custom names
         const savedNames = localStorage.getItem(LESSON_NAMES_KEY);
         if (savedNames) {
@@ -49,32 +38,24 @@ const LessonManager = () => {
                 console.error("Failed to parse custom names", e);
             }
         }
-
-        // Load progress
-        const savedProgress = localStorage.getItem(STORAGE_KEY);
-        if (savedProgress) {
-            try {
-                setProgress(JSON.parse(savedProgress));
-            } catch (e) {
-                console.error("Failed to parse progress", e);
-            }
-        }
     }, []);
 
     const allLessons = useMemo(() => {
+        if (!profile) return [];
+
         const lessons: LessonNote[] = [];
 
-        ENHANCED_SCHEDULE.forEach((day, dayIdx) => {
+        profile.schedule.forEach((day, dayIdx) => {
             day.subjects.forEach((subject, subIdx) => {
                 const key = `${dayIdx}-${subIdx}`;
                 const customName = customNames[key];
-                const note = notes[key] || "";
-                const completed = progress[key] || false;
+                const note = profile.notes[key] || "";
+                const completed = profile.progress[key] || false;
 
                 lessons.push({
                     dayIndex: dayIdx,
                     subjectIndex: subIdx,
-                    lessonName: subject.name,
+                    lessonName: subject.subjectName,
                     customName,
                     topic: subject.topic,
                     note,
@@ -85,7 +66,7 @@ const LessonManager = () => {
         });
 
         return lessons;
-    }, [notes, customNames, progress]);
+    }, [profile, customNames]);
 
     const filteredLessons = useMemo(() => {
         if (!searchQuery) return allLessons;
@@ -104,9 +85,13 @@ const LessonManager = () => {
 
     const handleSaveNote = (lesson: LessonNote, newNote: string) => {
         const key = `${lesson.dayIndex}-${lesson.subjectIndex}`;
-        const updatedNotes = { ...notes, [key]: newNote };
-        setNotes(updatedNotes);
-        localStorage.setItem(NOTES_STORAGE_KEY, JSON.stringify(updatedNotes));
+        updateNote(key, newNote);
+
+        // Update local state copy to visually reflect the changes instantly inside the modal
+        if (selectedLesson) {
+            setSelectedLesson({ ...selectedLesson, note: newNote });
+        }
+
         toast.success("Note saved! 💾");
     };
 
@@ -121,10 +106,7 @@ const LessonManager = () => {
 
     const handleDeleteNote = (lesson: LessonNote) => {
         const key = `${lesson.dayIndex}-${lesson.subjectIndex}`;
-        const updatedNotes = { ...notes };
-        delete updatedNotes[key];
-        setNotes(updatedNotes);
-        localStorage.setItem(NOTES_STORAGE_KEY, JSON.stringify(updatedNotes));
+        updateNote(key, "");
         setSelectedLesson(null);
         toast.success("Note deleted! 🗑️");
     };
@@ -240,8 +222,8 @@ const LessonManager = () => {
                             >
                                 <Card
                                     className={`p-5 cursor-pointer transition-all ${lesson.completed
-                                            ? "glass border border-success/30"
-                                            : "glass"
+                                        ? "glass border border-success/30"
+                                        : "glass"
                                         }`}
                                     onClick={() => setSelectedLesson(lesson)}
                                 >

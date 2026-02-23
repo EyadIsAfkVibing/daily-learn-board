@@ -4,8 +4,9 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ENHANCED_SCHEDULE, getLessonDisplayName } from "@/lib/schedule";
+import { getLessonDisplayName } from "@/lib/schedule";
 import { toast } from "sonner";
+import { useProfile } from "@/hooks/useProfileContext";
 
 const RESOURCES_STORAGE_KEY = "study-resources";
 
@@ -19,6 +20,7 @@ interface Resource {
 }
 
 const StudyResources = () => {
+    const { profile } = useProfile();
     const [resources, setResources] = useState<Resource[]>([]);
     const [isAdding, setIsAdding] = useState(false);
     const [selectedLesson, setSelectedLesson] = useState<string>("");
@@ -94,15 +96,17 @@ const StudyResources = () => {
 
     // Get all lessons for dropdown
     const allLessons: Array<{ key: string; label: string }> = [];
-    ENHANCED_SCHEDULE.forEach((day, dayIdx) => {
-        day.subjects.forEach((subject, subIdx) => {
-            const key = `${dayIdx}-${subIdx}`;
-            allLessons.push({
-                key,
-                label: `Day ${day.day}: ${getLessonDisplayName(subject)}`,
+    if (profile) {
+        profile.schedule.forEach((day, dayIdx) => {
+            day.subjects.forEach((subject, subIdx) => {
+                const key = `${dayIdx}-${subIdx}`;
+                allLessons.push({
+                    key,
+                    label: `Day ${day.day}: ${getLessonDisplayName({ name: subject.subjectName, lesson: subject.lessonNumber, topic: subject.topic } as any)}`,
+                });
             });
         });
-    });
+    }
 
     return (
         <div className="space-y-6">
@@ -240,8 +244,10 @@ const StudyResources = () => {
                 <div className="space-y-6">
                     {Object.entries(resourcesByLesson).map(([lessonKey, lessonResources]) => {
                         const [dayIdx, subIdx] = lessonKey.split("-").map(Number);
-                        const day = ENHANCED_SCHEDULE[dayIdx];
-                        const subject = day.subjects[subIdx];
+                        if (!profile) return null;
+                        const day = profile.schedule[dayIdx];
+                        const subject = day?.subjects[subIdx];
+                        if (!day || !subject) return null;
 
                         return (
                             <motion.div
@@ -251,7 +257,7 @@ const StudyResources = () => {
                             >
                                 <Card className="glass p-6">
                                     <h3 className="text-lg font-bold text-primary mb-4">
-                                        Day {day.day}: {getLessonDisplayName(subject)}
+                                        Day {day.day}: {getLessonDisplayName({ name: subject.subjectName, lesson: subject.lessonNumber, topic: subject.topic } as any)}
                                     </h3>
 
                                     <div className="grid gap-3">

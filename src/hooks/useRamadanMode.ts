@@ -2,8 +2,13 @@ import { useState, useEffect, useCallback } from "react";
 
 const RAMADAN_KEY = "study-dashboard-ramadan-mode";
 
-export const useRamadanMode = () => {
-  const [isRamadan, setIsRamadan] = useState(() => {
+interface UseRamadanModeReturn {
+  isRamadan: boolean;
+  toggle: () => void;
+}
+
+export const useRamadanMode = (): UseRamadanModeReturn => {
+  const [isRamadan, setIsRamadan] = useState<boolean>(() => {
     try {
       return localStorage.getItem(RAMADAN_KEY) === "true";
     } catch {
@@ -17,7 +22,11 @@ export const useRamadanMode = () => {
     } else {
       document.documentElement.classList.remove("ramadan");
     }
-    localStorage.setItem(RAMADAN_KEY, String(isRamadan));
+    try {
+      localStorage.setItem(RAMADAN_KEY, String(isRamadan));
+    } catch {
+      // localStorage unavailable — silently ignore
+    }
   }, [isRamadan]);
 
   const toggle = useCallback(() => setIsRamadan((v) => !v), []);

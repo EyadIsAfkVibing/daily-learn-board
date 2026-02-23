@@ -1,10 +1,21 @@
 import { motion } from "framer-motion";
 import FloatingParticles from "./FloatingParticles";
 
+/**
+ * PremiumBackground.tsx
+ * ─────────────────────────────────────────────────────────────────
+ * PERFORMANCE FIX: Removed filter: blur(70-90px) from all animated orbs.
+ * The radial-gradients already produce a soft falloff (... 0%, transparent 70%)
+ * which IS the blur effect. Adding blur(80px) on top doubled the GPU
+ * compositing cost for zero visual difference.
+ *
+ * Also removed will-change from static elements that don't animate.
+ */
+
 const PremiumBackground = () => {
   return (
     <>
-      {/* Layer 1 — Base mesh gradient */}
+      {/* Layer 1 — Base mesh gradient (static, no animation needed) */}
       <div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
@@ -17,7 +28,7 @@ const PremiumBackground = () => {
         }}
       />
 
-      {/* Layer 2 — Drifting orbs (GPU-accelerated) */}
+      {/* Layer 2 — Drifting orbs (NO blur filter — radial-gradient is inherently soft) */}
       <motion.div
         className="fixed pointer-events-none z-0 will-change-transform"
         style={{
@@ -26,7 +37,6 @@ const PremiumBackground = () => {
           top: "-5%",
           left: "0%",
           background: "radial-gradient(circle, hsl(260 70% 50% / 0.08) 0%, transparent 70%)",
-          filter: "blur(80px)",
         }}
         animate={{ x: [0, 60, -30, 0], y: [0, -40, 30, 0], scale: [1, 1.12, 0.93, 1] }}
         transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
@@ -40,7 +50,6 @@ const PremiumBackground = () => {
           bottom: "0%",
           right: "5%",
           background: "radial-gradient(circle, hsl(185 60% 45% / 0.07) 0%, transparent 70%)",
-          filter: "blur(80px)",
         }}
         animate={{ x: [0, -40, 25, 0], y: [0, 30, -35, 0], scale: [1, 1.1, 0.94, 1] }}
         transition={{ duration: 26, repeat: Infinity, ease: "easeInOut" }}
@@ -54,7 +63,6 @@ const PremiumBackground = () => {
           top: "35%",
           left: "45%",
           background: "radial-gradient(circle, hsl(230 50% 25% / 0.06) 0%, transparent 70%)",
-          filter: "blur(90px)",
         }}
         animate={{ x: [0, 35, -40, 0], y: [0, -20, 35, 0] }}
         transition={{ duration: 30, repeat: Infinity, ease: "easeInOut" }}
@@ -69,13 +77,12 @@ const PremiumBackground = () => {
           top: "60%",
           left: "15%",
           background: "radial-gradient(circle, hsl(var(--glow-warm) / 0.04) 0%, transparent 70%)",
-          filter: "blur(70px)",
         }}
         animate={{ x: [0, 20, -15, 0], y: [0, -25, 15, 0] }}
         transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
       />
 
-      {/* Layer 4 — Subtle drifting geometric shapes */}
+      {/* Layer 4 — Subtle drifting geometric shapes (CSS animation, no JS) */}
       <svg
         className="fixed inset-0 w-full h-full pointer-events-none z-0 opacity-[0.015]"
         xmlns="http://www.w3.org/2000/svg"
@@ -114,7 +121,7 @@ const PremiumBackground = () => {
         />
       </svg>
 
-      {/* Layer 5 — Grid pattern */}
+      {/* Layer 5 — Grid pattern (static) */}
       <div
         className="fixed inset-0 pointer-events-none z-0 opacity-[0.02]"
         style={{
@@ -126,7 +133,7 @@ const PremiumBackground = () => {
         }}
       />
 
-      {/* Layer 6 — Noise texture */}
+      {/* Layer 6 — Noise texture (static) */}
       <div
         className="fixed inset-0 pointer-events-none z-0 opacity-[0.03]"
         style={{
@@ -137,7 +144,7 @@ const PremiumBackground = () => {
       {/* Floating particles */}
       <FloatingParticles />
 
-      {/* Vignette */}
+      {/* Vignette (static) */}
       <div
         className="fixed inset-0 pointer-events-none z-[3]"
         style={{

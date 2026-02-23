@@ -3,33 +3,29 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ENHANCED_SCHEDULE, STORAGE_KEY, getLessonDisplayName } from "@/lib/schedule";
+import { getLessonDisplayName } from "@/lib/schedule";
+import { useProfile } from "@/hooks/useProfileContext";
 
 const WeeklySummary = () => {
     const navigate = useNavigate();
-    const [progress, setProgress] = useState<{ [key: string]: boolean }>({});
+    const { profile } = useProfile();
 
     useEffect(() => {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-            try {
-                setProgress(JSON.parse(saved));
-            } catch (e) {
-                console.error("Failed to parse progress", e);
-            }
-        }
-    }, []);
+        if (!profile) navigate("/profiles");
+    }, [profile, navigate]);
 
     const weeklyStats = useMemo(() => {
+        if (!profile) return [];
+
         const weeks = [];
         let currentWeek: any[] = [];
 
-        ENHANCED_SCHEDULE.forEach((day, dayIdx) => {
+        profile.schedule.forEach((day, dayIdx) => {
             let dayCompleted = 0;
             let dayTotal = day.subjects.length;
 
             day.subjects.forEach((_, subIdx) => {
-                if (progress[`${dayIdx}-${subIdx}`]) {
+                if (profile.progress[`${dayIdx}-${subIdx}`]) {
                     dayCompleted++;
                 }
             });
@@ -42,7 +38,7 @@ const WeeklySummary = () => {
                 percentage: Math.round((dayCompleted / dayTotal) * 100),
             });
 
-            if (currentWeek.length === 7 || dayIdx === ENHANCED_SCHEDULE.length - 1) {
+            if (currentWeek.length === 7 || dayIdx === profile.schedule.length - 1) {
                 const weekCompleted = currentWeek.reduce((sum, d) => sum + d.completed, 0);
                 const weekTotal = currentWeek.reduce((sum, d) => sum + d.total, 0);
 
@@ -58,7 +54,7 @@ const WeeklySummary = () => {
         });
 
         return weeks;
-    }, [progress]);
+    }, [profile]);
 
     const [selectedWeek, setSelectedWeek] = useState(0);
     const currentWeekData = weeklyStats[selectedWeek];
@@ -172,10 +168,10 @@ const WeeklySummary = () => {
                                     >
                                         <Card
                                             className={`p-5 transition-all ${isComplete
-                                                    ? "bg-success/10 border-2 border-success"
-                                                    : isStarted
-                                                        ? "glass border border-accent/50"
-                                                        : "glass"
+                                                ? "bg-success/10 border-2 border-success"
+                                                : isStarted
+                                                    ? "glass border border-accent/50"
+                                                    : "glass"
                                                 }`}
                                         >
                                             <div className="flex items-start justify-between mb-3">
@@ -214,14 +210,14 @@ const WeeklySummary = () => {
 
                                             {/* Lessons */}
                                             <div className="mt-3 space-y-1">
-                                                {day.subjects.map((subject, subIdx) => {
-                                                    const isLessonComplete = progress[`${day.dayIndex}-${subIdx}`];
+                                                {day.subjects.map((subject: any, subIdx: number) => {
+                                                    const isLessonComplete = profile?.progress[`${day.dayIndex}-${subIdx}`];
                                                     return (
                                                         <div
                                                             key={subIdx}
                                                             className={`text-xs p-2 rounded ${isLessonComplete
-                                                                    ? "bg-success/20 text-success"
-                                                                    : "bg-secondary/20 text-muted-foreground"
+                                                                ? "bg-success/20 text-success"
+                                                                : "bg-secondary/20 text-muted-foreground"
                                                                 }`}
                                                         >
                                                             {isLessonComplete ? "✓" : "○"} {subject.name}

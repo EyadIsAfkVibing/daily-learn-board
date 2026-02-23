@@ -3,30 +3,30 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-import { ENHANCED_SCHEDULE, STORAGE_KEY, NOTES_STORAGE_KEY, getLessonDisplayName } from "@/lib/schedule";
+import { getLessonDisplayName } from "@/lib/schedule";
+import { useProfile } from "@/hooks/useProfileContext";
 
 
-interface CalendarViewProps {
-    progress: { [key: string]: boolean };
-}
-
-const CalendarView = ({ progress }: CalendarViewProps) => {
+const CalendarView = () => {
+    const { profile } = useProfile();
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
     const [currentMonth, setCurrentMonth] = useState(new Date(2025, 9)); // October 2025
 
     const isDayComplete = (dayIndex: number, subjectCount: number) => {
+        if (!profile) return false;
         for (let i = 0; i < subjectCount; i++) {
             const key = `${dayIndex}-${i}`;
-            if (!progress[key]) return false;
+            if (!profile.progress[key]) return false;
         }
         return true;
     };
 
     const getDayProgress = (dayIndex: number, subjectCount: number) => {
+        if (!profile || subjectCount === 0) return 0;
         let completed = 0;
         for (let i = 0; i < subjectCount; i++) {
             const key = `${dayIndex}-${i}`;
-            if (progress[key]) completed++;
+            if (profile.progress[key]) completed++;
         }
         return Math.round((completed / subjectCount) * 100);
     };
@@ -49,25 +49,25 @@ const CalendarView = ({ progress }: CalendarViewProps) => {
         // Add days of the month
         for (let day = 1; day <= daysInMonth; day++) {
             const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            const scheduleDay = ENHANCED_SCHEDULE.find(s => s.date === dateStr);
+            const scheduleDay = profile ? profile.schedule.find(s => s.date === dateStr) : undefined;
             days.push({
                 date: day,
                 dateStr,
                 scheduleDay,
-                dayIndex: scheduleDay ? ENHANCED_SCHEDULE.indexOf(scheduleDay) : -1,
+                dayIndex: scheduleDay && profile ? profile.schedule.indexOf(scheduleDay) : -1,
             });
         }
 
         return days;
-    }, [currentMonth]);
+    }, [currentMonth, profile]);
 
     const selectedDayData = useMemo(() => {
-        if (!selectedDate) return null;
-        const scheduleDay = ENHANCED_SCHEDULE.find(s => s.date === selectedDate);
+        if (!selectedDate || !profile) return null;
+        const scheduleDay = profile.schedule.find(s => s.date === selectedDate);
         if (!scheduleDay) return null;
-        const dayIndex = ENHANCED_SCHEDULE.indexOf(scheduleDay);
+        const dayIndex = profile.schedule.indexOf(scheduleDay);
         return { ...scheduleDay, dayIndex };
-    }, [selectedDate]);
+    }, [selectedDate, profile]);
 
     const changeMonth = (delta: number) => {
         setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + delta));
@@ -220,7 +220,7 @@ const CalendarView = ({ progress }: CalendarViewProps) => {
                             <div className="space-y-2">
                                 {selectedDayData.subjects.map((subject, idx) => {
                                     const key = `${selectedDayData.dayIndex}-${idx}`;
-                                    const isCompleted = progress[key];
+                                    const isCompleted = profile ? profile.progress[key] : false;
 
                                     return (
                                         <motion.div
@@ -242,8 +242,8 @@ const CalendarView = ({ progress }: CalendarViewProps) => {
                                                     <div className="w-5 h-5 rounded-full border-2 border-border" />
                                                 )}
                                                 <div>
-                                                    <div className="font-semibold text-sm">{subject.name}</div>
-                                                    <div className="text-xs text-muted-foreground">Lesson {subject.lesson}</div>
+                                                    <div className="font-semibold text-sm">{subject.subjectName}</div>
+                                                    <div className="text-xs text-muted-foreground">Lesson {subject.lessonNumber}</div>
                                                 </div>
                                             </div>
                                             {isCompleted && (

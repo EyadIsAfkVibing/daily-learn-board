@@ -1,21 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import CalendarView from "@/components/CalendarView";
-import { STORAGE_KEY } from "@/lib/schedule";
-
 const CalendarPage = () => {
-    const [progress, setProgress] = useState<{ [key: string]: boolean }>({});
-
-    useEffect(() => {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-            try {
-                setProgress(JSON.parse(saved));
-            } catch (e) {
-                console.error("Failed to parse progress", e);
-            }
-        }
-    }, []);
 
     return (
         <div className="min-h-screen bg-background">
@@ -25,7 +11,7 @@ const CalendarPage = () => {
                     animate={{ opacity: 1, y: 0 }}
                 >
                     <h1 className="text-4xl font-bold text-primary mb-8">📅 Calendar</h1>
-                    <CalendarView progress={progress} />
+                    <CalendarView />
                 </motion.div>
             </div>
         </div>

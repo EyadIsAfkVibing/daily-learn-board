@@ -2,28 +2,33 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { ENHANCED_SCHEDULE, STORAGE_KEY, isDayComplete } from "@/lib/schedule";
+import { useProfile } from "@/hooks/useProfileContext";
+import type { Profile } from "@/lib/ProfileManager";
 
 interface StreakCounterProps {
   progress: { [key: string]: boolean };
 }
 
 const StreakCounter = ({ progress }: StreakCounterProps) => {
+  const { profile } = useProfile();
   const [currentStreak, setCurrentStreak] = useState(0);
   const [longestStreak, setLongestStreak] = useState(0);
   const [totalDaysCompleted, setTotalDaysCompleted] = useState(0);
 
   useEffect(() => {
+    if (!profile) return;
+
     let streak = 0;
     let maxStreak = 0;
     let tempStreak = 0;
     let daysCompleted = 0;
 
     const today = new Date().toISOString().split("T")[0];
-    const todayIndex = ENHANCED_SCHEDULE.findIndex((day) => day.date === today);
-    const endIndex = todayIndex >= 0 ? todayIndex + 1 : ENHANCED_SCHEDULE.length;
+    const todayIndex = profile.schedule.findIndex((day) => day.date === today);
+    const endIndex = todayIndex >= 0 ? todayIndex + 1 : profile.schedule.length;
 
     for (let i = 0; i < endIndex; i++) {
-      const day = ENHANCED_SCHEDULE[i];
+      const day = profile.schedule[i];
       if (isDayComplete(i, day.subjects.length, progress)) {
         tempStreak++;
         daysCompleted++;
@@ -34,7 +39,7 @@ const StreakCounter = ({ progress }: StreakCounterProps) => {
     }
 
     for (let i = endIndex - 1; i >= 0; i--) {
-      const day = ENHANCED_SCHEDULE[i];
+      const day = profile.schedule[i];
       if (isDayComplete(i, day.subjects.length, progress)) {
         streak++;
       } else {
@@ -45,7 +50,7 @@ const StreakCounter = ({ progress }: StreakCounterProps) => {
     setCurrentStreak(streak);
     setLongestStreak(maxStreak);
     setTotalDaysCompleted(daysCompleted);
-  }, [progress]);
+  }, [progress, profile]);
 
   const getStreakEmoji = () => {
     if (currentStreak === 0) return "😴";
